@@ -9,6 +9,18 @@ class Var:
     def value(self, assignments):
         return assignments[self.name]
 
+    def setVariables(self, assignments={}):
+        '''Returns true(), false() or copy of itself
+        depending on assignments.'''
+
+        if(self.name in assignments):
+            if(assignments[self.name]):
+                return true()
+            else:
+                return false()
+
+        return Var(self.name)
+
     def simplify(self):
         return self
 
@@ -24,6 +36,9 @@ class Or:
     def value(self, assignments):
         return reduce(lambda x, y: x or y,
                       map(lambda x: x.value(assignments), self.clause))
+
+    def setVariables(self, assignments={}):
+        return Or(map(lambda x: x.setVariables(assignments), self.clause))
 
     def simplify(self):
         if len(self.clause) == 0:
@@ -52,6 +67,9 @@ class And:
         return reduce(lambda x, y: x and y, map(lambda x: x.value(assignments),
                                                 self.clause))
 
+    def setVariables(self, assignments={}):
+        return And(map(lambda x: x.setVariables(assignments), self.clause))
+
     def simplify(self):
 
         if len(self.clause) == 0:
@@ -77,6 +95,9 @@ class Not:
 
     def value(self, assignments):
         return not self.clause.value(assignments)
+
+    def setVariables(self, assignments={}):
+        return Not(self.clause.setVariables(assignments))
 
     def simplify(self):
         if self.clause.__class__.__name__ == "And":
@@ -107,6 +128,9 @@ class true:
     def simplify(self):
         return self
 
+    def setVariables(self, assignments={}):
+        return true()
+
     def __unicode__(self):
         return u"\u22a4"
 
@@ -117,6 +141,9 @@ class false:
 
     def simplify(self):
         return self
+
+    def setVariables(self, assignments={}):
+        return false()
 
     def __unicode__(self):
         return u"\u22a5"
@@ -183,6 +210,19 @@ def main():
     ])
 
     test(expr, ["p", "q"])
+
+    print "Testing setVariables method."
+    print "Testing setVariables method - proper copy."
+    newexpr = expr.setVariables()
+
+    print unicode(expr)
+    print unicode(newexpr)
+
+    print "Testing setVariables method - independent copy."
+    newexpr1 = expr.setVariables({"p": False})
+    newexpr2 = expr.setVariables({"p": True})
+    print unicode(newexpr1)
+    print unicode(newexpr2)
 
 if __name__ == '__main__':
     main()
