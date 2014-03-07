@@ -31,15 +31,17 @@ def graph_coloring(graph, colors):
 
     main_formula = And(subformula + main_formula.clause)
 
-    #simplifying formula
-    main_formula.simplify()
-
     #constructing variable names
     variable_names = map(lambda x: x.name,
                          reduce(lambda x, y: x + y, variables))
 
-    #evauating
-    return evaluateFormula(main_formula, variable_names)
+    #simplifying formula
+    return (main_formula.simplify(), variable_names)
+
+
+def solveGraphColoring(graph, colors):
+    (formula, variableNames) = graph_coloring(graph, colors)
+    return evaluateFormula(formula, variableNames)
 
 
 def main():
@@ -52,7 +54,7 @@ def main():
     colors = 2
 
 #   print graph
-#   print graph_coloring(graph, colors)
+#   print solveGraphColoring(graph, colors)
 
     graph = [
         [1, 0, 0],
@@ -61,7 +63,7 @@ def main():
     ]
 
 #    print graph
-#    print graph_coloring(graph, colors)
+#    print solveGraphColoring(graph, colors)
 
     lih_cikel=[
         [0, 1, 1],
@@ -85,11 +87,11 @@ def main():
     ]
 
 
-    print graph_coloring(sod_cikel, 2)
-    print graph_coloring(lih_cikel, 2)
-    print graph_coloring(g, 2)
-    print graph_coloring(g, 3)
-    print graph_coloring(g, 4)
+    print solveGraphColoring(sod_cikel, 2)
+    print solveGraphColoring(lih_cikel, 2)
+    print solveGraphColoring(g, 2)
+    print solveGraphColoring(g, 3)
+    print solveGraphColoring(g, 4)
 
 if __name__ == '__main__':
     main()
