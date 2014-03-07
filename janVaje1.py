@@ -9,6 +9,9 @@ class Var:
     def value(self, assignments):
         return assignments[self.name]
 
+    def evaluate(self, assignments={}):
+        return (self.setVariables(assignments))
+
     def setVariables(self, assignments={}):
         '''Returns true(), false() or copy of itself
         depending on assignments.'''
@@ -36,6 +39,9 @@ class Or:
     def value(self, assignments):
         return reduce(lambda x, y: x or y,
                       map(lambda x: x.value(assignments), self.clause))
+
+    def evaluate(self, assignments={}):
+        return (self.setVariables(assignments)).simplify()
 
     def setVariables(self, assignments={}):
         return Or(map(lambda x: x.setVariables(assignments), self.clause))
@@ -67,6 +73,9 @@ class And:
         return reduce(lambda x, y: x and y, map(lambda x: x.value(assignments),
                                                 self.clause))
 
+    def evaluate(self, assignments={}):
+        return (self.setVariables(assignments)).simplify()
+
     def setVariables(self, assignments={}):
         return And(map(lambda x: x.setVariables(assignments), self.clause))
 
@@ -93,8 +102,12 @@ class Not:
     def __init__(self, l):
         self.clause = l
 
+    #should not be used
     def value(self, assignments):
         return not self.clause.value(assignments)
+
+    def evaluate(self, assignments={}):
+        return (self.setVariables(assignments)).simplify()
 
     def setVariables(self, assignments={}):
         return Not(self.clause.setVariables(assignments))
@@ -125,6 +138,9 @@ class true:
     def value(self, assignments):
         return True
 
+    def evaluate(self, assignments={}):
+        return true()
+
     def simplify(self):
         return self
 
@@ -138,6 +154,9 @@ class true:
 class false:
     def value(self, assignments):
         return False
+
+    def evaluate(self, assignments={}):
+        return false()
 
     def simplify(self):
         return self
@@ -222,7 +241,13 @@ def main():
     newexpr1 = expr.setVariables({"p": False})
     newexpr2 = expr.setVariables({"p": True})
     print unicode(newexpr1)
+    print unicode(newexpr1.simplify())
     print unicode(newexpr2)
+    print unicode(newexpr2.simplify())
+
+    print "Testing simplify method."
+    print unicode(expr.evaluate({"p": False}))
+    print unicode(expr.evaluate({"p": True}))
 
 if __name__ == '__main__':
     main()
