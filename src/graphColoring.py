@@ -1,24 +1,6 @@
 #!/usr/bin/env python
-from janVaje1 import *
-
-
-def evaluateFormula(expr, varlist, assignments={}):
-    if len(varlist) == 0:
-
-        value = expr.value(assignments)
-
-        if value:
-            return True
-
-        return False
-
-    r_value = False
-    for i in [False, True]:
-        assignments[varlist[0]] = i
-        r_value = r_value or evaluateFormula(expr, varlist[1:], assignments)
-
-    return r_value
-
+from logConstructs import *
+from sat import *
 
 def graph_coloring(graph, colors):
 
@@ -31,7 +13,7 @@ def graph_coloring(graph, colors):
     for i in range(len(graph)):
         for j in range(colors):
             variables[i][j] = Var("X" + str(i) + "" + str(j))
-    
+
     #construct first subformula
     main_formula = And(map(lambda x: Or(x), variables))
 
@@ -56,13 +38,9 @@ def graph_coloring(graph, colors):
     variable_names = map(lambda x: x.name,
                          reduce(lambda x, y: x + y, variables))
 
-
     #evauating
     return evaluateFormula(main_formula, variable_names)
 
-
-
-            
 
 def main():
     graph = [
@@ -73,8 +51,8 @@ def main():
 
     colors = 2
 
- #   print graph
-#    print graph_coloring(graph, colors)
+#   print graph
+#   print graph_coloring(graph, colors)
 
     graph = [
         [1, 0, 0],
@@ -90,28 +68,28 @@ def main():
         [1, 0, 1],
         [1, 1, 0],
     ]
-    
+
     sod_cikel=[
         [0, 1, 0, 1],
         [1, 0, 1, 0],
         [0, 1, 0, 1],
         [1, 0, 1, 0],
     ]
-    
+
     g=[
         [0, 1, 1, 1, 1],
         [1, 0, 1, 1, 0],
         [1, 1, 0, 1, 0],
         [1, 1, 1, 0, 1],
         [1, 0, 0, 1, 0]
-    ]    
-    
-    
+    ]
+
+
     print graph_coloring(sod_cikel, 2)
- #   print graph_coloring(lih_cikel, 2)
-#    print graph_coloring(g, 2)
-#    print graph_coloring(g, 3)
-#    print graph_coloring(g, 4)
- 
+    print graph_coloring(lih_cikel, 2)
+    print graph_coloring(g, 2)
+    print graph_coloring(g, 3)
+    print graph_coloring(g, 4)
+
 if __name__ == '__main__':
     main()

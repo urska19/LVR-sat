@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
-from janVaje1 import *
-from urskaVaje2 import evaluateFormula
+from logConstructs import *
+from sat import *
 
 # boxes: (row, col, num)
 
