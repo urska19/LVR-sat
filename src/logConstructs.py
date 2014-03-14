@@ -27,6 +27,12 @@ class Var:
     def simplify(self):
         return self
 
+    def nnf(self):
+        return self
+
+    def cnf(self):
+        return And([self])
+
     def __unicode__(self):
         return unicode(self.name)
 
@@ -59,6 +65,25 @@ class Or:
             return true()
 
         return ret
+    
+    def nnf(self):
+        return Or(map(lambda x: x.nnf(), self.clause))
+
+    def cnf(self):
+        newclause = []
+        for i in xrange(len(self.clause)):
+            if self.clause[i].__class__.__name__ == "Or":
+                newclause += map(lambda x: x, self.clause[i].clause)
+            else:
+                newclause.append(self.clause[i])
+        newclause = map(lambda x: x.cnf(), newclause)
+
+        for i in xrange(len(newclause)):
+            if newclause[i].__class__.__name__ == "And":
+                complement = newclause[:i] + newclause[i+1:]
+                return And(map(lambda x: Or(complement+[x]), newclause[i].clause)).cnf()
+
+        return And(Or(newclause))
 
     def __unicode__(self):
         return "(" + u" \u2228 ".join(map(unicode, self.clause)) + u")"
@@ -94,6 +119,20 @@ class And:
 
         return ret
 
+    def nnf(self):
+        return And(map(lambda x: x.nnf(), self.clause))
+
+    def cnf(self):
+        print "CNF And: ", unicode(self)
+        newclause = []
+        for i in xrange(len(self.clause)):
+            if self.clause[i].__class__.__name__ == "And":
+                newclause += reduce(lambda c, x: c+x.cnf().clause, [[]]+self.clause[i].clause)
+            else:
+                newclause += self.clause[i].cnf().clause
+
+        return And(newclause)
+
     def __unicode__(self):
         return u"(" + u" \u2227 ".join(map(unicode, self.clause)) + u")"
 
@@ -113,14 +152,17 @@ class Not:
         return Not(self.clause.setVariables(assignments))
 
     def simplify(self):
+        return Not(self.clause.simplify())
+
+    def nnf(self):
         if self.clause.__class__.__name__ == "And":
-            return Or(map(lambda x: Not(x), self.clause.clause)).simplify()
+            return Or(map(lambda x: Not(x), self.clause.clause)).nnf()
 
         if self.clause.__class__.__name__ == "Or":
-            return And(map(lambda x: Not(x), self.clause.clause)).simplify()
+            return And(map(lambda x: Not(x), self.clause.clause)).nnf()
 
         if self.clause.__class__.__name__ == "Not":
-            return self.clause.clause.simplify()
+            return self.clause.clause.nnf()
 
         if self.clause.__class__.__name__ == "false":
             return true()
@@ -128,7 +170,10 @@ class Not:
         if self.clause.__class__.__name__ == "true":
             return false()
 
-        return Not(self.clause.simplify())
+        return Not(self.clause.nnf())
+
+    def cnf(self):
+        return And([Or([self])])
 
     def __unicode__(self):
         return u'\u00ac(' + unicode(self.clause) + u")"
@@ -143,6 +188,12 @@ class true:
 
     def simplify(self):
         return self
+
+    def nnf(self):
+        return self
+
+    def cnf(self):
+        return And([Or([self])])
 
     def setVariables(self, assignments={}):
         return true()
@@ -160,6 +211,12 @@ class false:
 
     def simplify(self):
         return self
+
+    def nnf(self):
+        return self
+
+    def cnf(self):
+        return And([Or([self])])
 
     def setVariables(self, assignments={}):
         return false()
@@ -219,6 +276,7 @@ def main():
     ])
 
     test(expr,  ["p", "q"])
+    print "CNF: "+unicode(expr.cnf())
 
     expr = And([
         Or([
