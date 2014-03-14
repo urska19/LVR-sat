@@ -31,7 +31,7 @@ class Var:
         return self
 
     def cnf(self):
-        return And([self])
+        return And([Or([self])])
 
     def __unicode__(self):
         return unicode(self.name)
@@ -65,25 +65,44 @@ class Or:
             return true()
 
         return ret
-    
+
     def nnf(self):
         return Or(map(lambda x: x.nnf(), self.clause))
 
     def cnf(self):
-        newclause = []
-        for i in xrange(len(self.clause)):
-            if self.clause[i].__class__.__name__ == "Or":
-                newclause += map(lambda x: x, self.clause[i].clause)
-            else:
-                newclause.append(self.clause[i])
-        newclause = map(lambda x: x.cnf(), newclause)
 
+        #PSEUDOCODE
+        #remove all nested or classes
+        #apply distribution if there are and classes
+        #if there are no and classes only thing which remains are literals
+            #return and(or(literals))
+
+        #remove nested ors
+        newselfclauses = self.clause
+        ors = True
+        while ors:
+            ors = False
+
+            newclause = []
+
+            for i in xrange(len(newselfclauses)):
+                if newselfclauses[i].__class__.__name__ == "Or":
+                    newclause += newselfclauses[i].clause
+                    ors = True
+                else:
+                    newclause.append(newselfclauses[i])
+
+            newselfclauses = newclause
+
+
+        #apply distribution
         for i in xrange(len(newclause)):
             if newclause[i].__class__.__name__ == "And":
                 complement = newclause[:i] + newclause[i+1:]
                 return And(map(lambda x: Or(complement+[x]), newclause[i].clause)).cnf()
 
-        return And(Or(newclause))
+        #return cnf
+        return And([Or(newclause)])
 
     def __unicode__(self):
         return "(" + u" \u2228 ".join(map(unicode, self.clause)) + u")"
@@ -123,14 +142,30 @@ class And:
         return And(map(lambda x: x.nnf(), self.clause))
 
     def cnf(self):
-        print "CNF And: ", unicode(self)
-        newclause = []
-        for i in xrange(len(self.clause)):
-            if self.clause[i].__class__.__name__ == "And":
-                newclause += reduce(lambda c, x: c+x.cnf().clause, [[]]+self.clause[i].clause)
-            else:
-                newclause += self.clause[i].cnf().clause
+        #PSEUDOCODE
+        #propagate cnf
+        #remove all nested ands
+        #onley thing which remains are or classes - return And(ors)
 
+        #propagate cnf
+        newselfclauses = map(lambda x: x.cnf(), self.clause)
+
+        #remove all nested Ands
+        ands = True
+        while ands:
+            ands = False
+
+            newclause = []
+            for i in xrange(len(newselfclauses)):
+                if newselfclauses[i].__class__.__name__ == "And":
+                    newclause += newselfclauses[i].clause
+                    ands = True
+                else:
+                    newclause.append(newselfclauses[i])
+
+            newselfclauses = newclause
+
+        #return cnf
         return And(newclause)
 
     def __unicode__(self):
@@ -173,6 +208,7 @@ class Not:
         return Not(self.clause.nnf())
 
     def cnf(self):
+        #return And([self])
         return And([Or([self])])
 
     def __unicode__(self):
@@ -193,6 +229,7 @@ class true:
         return self
 
     def cnf(self):
+        #return And([self])
         return And([Or([self])])
 
     def setVariables(self, assignments={}):
@@ -216,6 +253,7 @@ class false:
         return self
 
     def cnf(self):
+        #return And([self])
         return And([Or([self])])
 
     def setVariables(self, assignments={}):
