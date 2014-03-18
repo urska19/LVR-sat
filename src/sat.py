@@ -5,14 +5,61 @@ class SAT_solver:
 
     @staticmethod
     def up(formula):
-        #forall Or nodes with size of clause == 1 add variable name and value to dictionary
-        #if variable has True and False add special value
-        #return dictionary
-        pass
+        """Return None if there is contradiction and dictionary otherwise."""
+        #filter cluses which contains one element
+        fformula = filter(lambda x: len(x.clause) == 1, formula)
+
+        result = {}
+        #if there are elements in formula then they are Variable or
+        #Not class
+        for element in fformula:
+            if element.clause.__class__.__name__ == "Var":
+                name = element.clause.name
+                eresult = True
+            else:
+                name = element.clause.clause.name
+                eresult = False
+
+            #check if formula contains contradiction
+            if name in result and result[name] != eresult:
+                return None
+            else:
+                result[name] = eresult
+
+        return result
+
+    #return all elements values which can be purged
+    def filterElements(element):
+        result = {}
+        for el in element:
+            if el.__class__.__name__ == "Var":
+                name = el.name
+                eresult = True
+            else:
+                name = el.clause.name
+                eresult = False
+
+            if name in result[name] and result[name] != eresult:
+                result[name] = None
+            else:
+                result[name] = eresult
+
+        return {i: j for i, j in result.items() if j is not None}
 
     @staticmethod
     def purge(formula):
-        pass
+        """Return None if there is no elements which can be"""
+        """purged or dictionary otherwise."""
+        #get all variables in clauses
+        assignments = filterElements(reduce(lambda x, y: x + y,
+                                            map(lambda x: x.clause, formula)))
+
+        #if there is no element for purging return None
+        if assignments == {}:
+            return None
+
+        #return purged formula
+        return formula.evaluate(assignments)
 
     def solve(formula):
         #convert to NNF
@@ -21,16 +68,11 @@ class SAT_solver:
         pass
 
     def solve_cnf(formula):
-        #while call up != []
-            #dictinary = up(formula)
-            #if dictionary contains special value return False
-            #formula = formula.evaluate(dictionary)
+        #while call values = up != {}
+            #if values = None return False
+            #formula = formula.evaluate(values)
 
-        #while call purge != []
-            #dictionary = purge(formula)
-            #formula = formula.evaluate(dictionary)
-
-        #scan for remaining variables
+        #while call purge != None
 
         #=============================================
         #multithreading - spliting search
