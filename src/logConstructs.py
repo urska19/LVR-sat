@@ -31,6 +31,7 @@ class Var:
         return self
 
     def cnf(self):
+        #assume NNF
         return And([Or([self])])
 
     def __unicode__(self):
@@ -70,6 +71,7 @@ class Or:
         return Or(map(lambda x: x.nnf(), self.clause))
 
     def cnf(self):
+        #assume NNF
 
         #PSEUDOCODE
         #remove all nested or classes
@@ -142,6 +144,8 @@ class And:
         return And(map(lambda x: x.nnf(), self.clause))
 
     def cnf(self):
+        #assume NNF
+
         #PSEUDOCODE
         #propagate cnf
         #remove all nested ands
@@ -216,7 +220,7 @@ class Not:
         return Not(self.clause.nnf())
 
     def cnf(self):
-        #return And([self])
+        #assume NNF
         return And([Or([self])])
 
     def __unicode__(self):
@@ -237,7 +241,7 @@ class true:
         return self
 
     def cnf(self):
-        #return And([self])
+        #assume NNF
         return And([Or([self])])
 
     def setVariables(self, assignments={}):
@@ -261,7 +265,7 @@ class false:
         return self
 
     def cnf(self):
-        #return And([self])
+        #assume NNF
         return And([Or([self])])
 
     def setVariables(self, assignments={}):
@@ -322,8 +326,42 @@ def main():
     ])
 
     test(expr,  ["p", "q"])
-    print "CNF: "+unicode(expr.cnf())
+    print "================================================="
+    print "CNF"
+    print "================================================="
+    expr = Or([
+        Var("p"),
+        And([
+            Var("q"),
+            Var("p")
+            ])
+    ])
+    expr2 = Var("p")
+    expr3 = Or([Var("p"), Var("q")])
+    expr4 = Or([And([Var("p"), Var("q")]), Var("h"), And([Var("g"), Var("k")])])
+    expr5 = true()
+    expr6 = false()
+    expr7 = And([Var("p"), Var("q")])
 
+    print "Expression: " + unicode(expr2)
+    print "Expression (CNF): "+ unicode(expr2.cnf())
+    print "Expression: " + unicode(expr5)
+    print "Expression (CNF): "+ unicode(expr5.cnf())
+    print "Expression: " + unicode(expr6)
+    print "Expression (CNF): "+ unicode(expr6.cnf())
+    print "Expression: " + unicode(expr3)
+    print "Expression (CNF): "+ unicode(expr3.cnf())
+    print "Expression: " + unicode(expr7)
+    print "Expression (CNF): "+ unicode(expr7.cnf())
+    print "Expression: " + unicode(expr)
+    print "Expression (CNF): "+ unicode(expr.cnf())
+    print "Expression: " + unicode(expr4)
+    print "Expression (CNF): "+ unicode(expr4.cnf())
+    print "================================================="
+
+    print "================================================="
+    print "Test function."
+    print "================================================="
     expr = And([
         Or([
             Not(Var("p")),
@@ -331,27 +369,41 @@ def main():
         ]),
         Var("p")
     ])
-
     test(expr, ["p", "q"])
-
+    print "================================================="
+    print "================================================="
     print "Testing setVariables method."
+    print "================================================="
     print "Testing setVariables method - proper copy."
+    print "================================================="
     newexpr = expr.setVariables()
+    newexpr2 = expr.setVariables({"p": False})
 
-    print unicode(expr)
-    print unicode(newexpr)
+    print "Expression: " + unicode(expr)
+    print "Expression (setVariables-empty): " + unicode(newexpr)
+    print "Expression (setVariables- p->False): " + unicode(newexpr2)
 
+    print "================================================="
     print "Testing setVariables method - independent copy."
+    print "================================================="
+
     newexpr1 = expr.setVariables({"p": False})
     newexpr2 = expr.setVariables({"p": True})
-    print unicode(newexpr1)
-    print unicode(newexpr1.simplify())
-    print unicode(newexpr2)
-    print unicode(newexpr2.simplify())
+    newexpr3 = expr.setVariables({"z": True})
 
+    print "Expression: " + unicode(expr)
+    print "Expression (p->False): " + unicode(newexpr1)
+    print "Expression (p->True): " + unicode(newexpr2)
+    print "Expression (z->True): " + unicode(newexpr3)
+
+    print "================================================="
+    print "================================================="
     print "Testing simplify method."
-    print unicode(expr.evaluate({"p": False}))
-    print unicode(expr.evaluate({"p": True}))
+    print "================================================="
+    print "Expression: " + unicode(expr)
+    print "Expression (p -> False): " + unicode(expr.evaluate({"p": False}))
+    print "Expression (p -> True): " + unicode(expr.evaluate({"p": True}))
+    print "================================================="
 
 if __name__ == '__main__':
     main()
