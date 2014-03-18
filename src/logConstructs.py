@@ -187,7 +187,15 @@ class Not:
         return Not(self.clause.setVariables(assignments))
 
     def simplify(self):
-        return Not(self.clause.simplify())
+        formula = self.clause.simplify()
+        name = formula.__class__.__name__
+
+        if name == "false":
+            return true()
+        elif name == "true":
+            return false()
+        else:
+            return Not(formula)
 
     def nnf(self):
         if self.clause.__class__.__name__ == "And":
