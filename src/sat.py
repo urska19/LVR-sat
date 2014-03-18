@@ -28,8 +28,14 @@ class SAT_solver:
 
         return result
 
-    #return all elements values which can be purged
-    def filterElements(element):
+    @staticmethod
+    def purge(formula):
+        """Return None if there is no elements which can be"""
+        """purged or dictionary otherwise."""
+        #get all variables in clauses
+        element = filterElements(reduce(lambda x, y: x + y,
+                                        map(lambda x: x.clause, formula)))
+
         result = {}
         for el in element:
             if el.__class__.__name__ == "Var":
@@ -46,21 +52,6 @@ class SAT_solver:
 
         return {i: j for i, j in result.items() if j is not None}
 
-    @staticmethod
-    def purge(formula):
-        """Return None if there is no elements which can be"""
-        """purged or dictionary otherwise."""
-        #get all variables in clauses
-        assignments = filterElements(reduce(lambda x, y: x + y,
-                                            map(lambda x: x.clause, formula)))
-
-        #if there is no element for purging return None
-        if assignments == {}:
-            return None
-
-        #return purged formula
-        return formula.evaluate(assignments)
-
     def solve(formula):
         #convert to NNF
         #convert to CNF
@@ -72,7 +63,8 @@ class SAT_solver:
             #if values = None return False
             #formula = formula.evaluate(values)
 
-        #while call purge != None
+        #while call purge != []
+        #evaluate formula
 
         #=============================================
         #multithreading - spliting search
