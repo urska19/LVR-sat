@@ -54,7 +54,7 @@ class Or:
 
     def simplify(self):
         if len(self.clause) == 0:
-            return true()
+            return false()
 
         ret = Or(map(lambda x: x.simplify(), self.clause))
 
