@@ -64,8 +64,28 @@ class Or:
 
         if "true" in map(lambda x: x.__class__.__name__, ret.clause):
             return true()
-
+	
         return ret
+
+    def deduplicate(self):
+        # eliminate duplicate variable instances (and treat negations separately)
+        i = 0
+	varlist = set()
+        negvars = set()
+        while i<len(self.clause):
+	    if self.clause[i].__class__.__name__ == "Var":
+                if self.clause[i].name in varlist:
+                    del self.clause[i]
+                    i-=1
+                else:
+                    varlist.add(self.clause[i].name)
+            if self.clause[i].__class__.__name__ == "Not" and self.clause[i].clause.__class__.__name__ == "Var":
+                if self.clause[i].clause.name in negvars:
+                    del self.clause[i]
+                    i-=1
+                else:
+                    negvars.add(self.clause[i].clause.name)
+            i+=1
 
     def nnf(self):
         return Or(map(lambda x: x.nnf(), self.clause))
@@ -139,6 +159,9 @@ class And:
             return false()
 
         return ret
+
+    def deduplicate(self):
+        self.clause = map(lambda x: x.deduplicate(), self.clause)
 
     def nnf(self):
         return And(map(lambda x: x.nnf(), self.clause))

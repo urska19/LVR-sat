@@ -53,8 +53,8 @@ def main():
 
     colors = 2
 
-#   print graph
-#   print solveGraphColoring(graph, colors)
+#    print graph
+    print solveGraphColoring(graph, colors)
 
     graph = [
         [1, 0, 0],
@@ -62,8 +62,8 @@ def main():
         [0, 0, 1],
     ]
 
-#    print graph
-#    print solveGraphColoring(graph, colors)
+#     print graph
+    print solveGraphColoring(graph, colors)
 
     lih_cikel=[
         [0, 1, 1],

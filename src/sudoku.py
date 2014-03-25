@@ -5,20 +5,21 @@ from sat import *
 
 # boxes: (row, col, num)
 
+# ensure that every box is filled
 def fill_conditions(a):
     ret=[]
-    for i in range(9): # row
-        for j in range(9): # col
-            r=[a[i][j]] if a[i][j] else range(1,10)
+    for i in range(1): # row
+        for j in range(1): # col
+            r=[a[i][j]] if a[i][j] else range(1,10) # all the possible values for this box
             disj=[]
-            for k in r: # value in this box
+            for k in r: # fix one value for this box
                 conj=[Var("%d%d%d"%(i,j,k))]
-                for l in range(9): # other values for this box
-                    v=Var("%d%d%d"%(i,j,k))
+                for l in range(1,10): # other values for this box
+                    v=Var("%d%d%d"%(i,j,l))
                     if k!=l:
                         conj.append(Not(v))
                 disj.append(And(conj))
-            ret+=disj
+            ret.append(Or(disj))
     return And(ret)
 def row_conditions():
     ret=[]
@@ -49,6 +50,7 @@ def square_conditions():
 
 def sudoku(a):
     formula=And([fill_conditions(a),row_conditions(),col_conditions(),square_conditions()])
+    #formula=And([fill_conditions(a)])
     variableNames = [ "%d%d%d"%(y,x,v) for v in range(1,10) for x in range(9) for y in range(9)]
     return (formula, variableNames)
 
@@ -57,14 +59,14 @@ def solveSudoku(a):
     (formula, variableNames) = sudoku(a)
     return evaluateFormula(formula, variableNames)
 
-
-a=[[None, 8, None, 1, 6, None, None, None, 7],
- [1, None, 7, 4, None, 3, 6, None, None],
- [3, None, None, 5, None, None, 4, 2, None],
- [None, 9, None, None, 3, 2, 7, None, 4],
- [None, None, None, None, None, None, None, None, None],
- [2, None, 4, 8, 1, None, None, 6, None],
- [None, 4, 1, None, None, 8, None, None, 6],
- [None, None, 6, 7, None, 1, 9, None, 3],
- [7, None, None, None, 9, 6, None, 4, None]]
-print sudoku(a)
+if __name__ == "__main__":
+    a=[[None, 8, None, 1, 6, None, None, None, 7],
+     [1, None, 7, 4, None, 3, 6, None, None],
+     [3, None, None, 5, None, None, 4, 2, None],
+     [None, 9, None, None, 3, 2, 7, None, 4],
+     [None, None, None, None, None, None, None, None, None],
+     [2, None, 4, 8, 1, None, None, 6, None],
+     [None, 4, 1, None, None, 8, None, None, 6],
+     [None, None, 6, 7, None, 1, 9, None, 3],
+     [7, None, None, None, 9, 6, None, 4, None]]
+    print sudoku(a)[0].nnf().cnf()
