@@ -82,7 +82,17 @@ print "================================================="
 print "Expression: " + unicode(expr)
 print "Expression (p -> False): " + unicode(expr.evaluate({"p": False}))
 print "Expression (p -> True): " + unicode(expr.evaluate({"p": True}))
+emptyexpr = And([Or([])])
+print "Expression " + unicode(emptyexpr) + ": " + unicode(emptyexpr.evaluate({}))
 print "================================================="
+
+print "================================================="
+print "Testing deduplicate method."
+print "================================================="
+dedupexpr = And([ Or([Var("x1"), Var("x2")]) ])
+print "Expession: " + unicode(dedupexpr) + " -> " + unicode(dedupexpr.deduplicate())
+dedupexpr = And([ Or([Var("x1"), Var("x1")]) ])
+print "Expession: " + unicode(dedupexpr) + " -> " + unicode(dedupexpr.deduplicate())
 
 print "================================================="
 solver = SAT_solver()
@@ -113,8 +123,11 @@ board=[[None, 8, None, 1, 6, None, None, None, 7],
  [7, None, None, None, 9, 6, None, 4, None]]
 printsudoku(board)
 import sys
+formula = sudoku(board)[0]
 sys.stderr.write( unicode(sudoku(board)[0].nnf().cnf().simplify()).encode("utf-8") )
-print(solver.solve(sudoku(board)[0]))
+result = solver.solve(sudoku(board)[0])
+evaluated = formula.nnf().cnf().deduplicate().evaluate(result)
+print result, unicode(evaluated)
 
 print "================================================="
 print "graph coloring"
@@ -128,6 +141,11 @@ graph = [
 colors = 2
 f = graph_coloring(graph, colors)[0]
 print "graph:", unicode(f), "->", solver.solve(f)
+solution = solver.solve(f)
+#del solution['']
+solved=f.nnf().cnf().evaluate(solution)
+print unicode(solved)
+print "solution: \033[31;1m"+`solution`+"\033[0m"
 
 graph = [
     [1, 0, 0],

@@ -65,6 +65,9 @@ class Or:
         if "true" in map(lambda x: x.__class__.__name__, ret.clause):
             return true()
 	
+        if len(ret.clause) == 0:
+            return false()
+
         return ret
 
     def deduplicate(self):
@@ -86,6 +89,7 @@ class Or:
                 else:
                     negvars.add(self.clause[i].clause.name)
             i+=1
+        return self
 
     def nnf(self):
         return Or(map(lambda x: x.nnf(), self.clause))
@@ -121,10 +125,10 @@ class Or:
         for i in xrange(len(newclause)):
             if newclause[i].__class__.__name__ == "And":
                 complement = newclause[:i] + newclause[i+1:]
-                return And(map(lambda x: Or(complement+[x]), newclause[i].clause)).cnf()
+                return And(map(lambda x: Or(complement+[x]).deduplicate(), newclause[i].clause)).cnf()
 
         #return cnf
-        return And([Or(newclause)])
+        return And([Or(newclause).deduplicate()])
 
     def __unicode__(self):
         return "(" + u" \u2228 ".join(map(unicode, self.clause)) + u")"
@@ -158,10 +162,14 @@ class And:
         if "false" in map(lambda x: x.__class__.__name__, ret.clause):
             return false()
 
+        if len(ret.clause) == 0:
+            return true()
+
         return ret
 
     def deduplicate(self):
         self.clause = map(lambda x: x.deduplicate(), self.clause)
+        return self
 
     def nnf(self):
         return And(map(lambda x: x.nnf(), self.clause))
@@ -224,6 +232,8 @@ class Not:
         else:
             return Not(formula)
 
+    def deduplicate(self): return self
+
     def nnf(self):
         if self.clause.__class__.__name__ == "And":
             return Or(map(lambda x: Not(x), self.clause.clause)).nnf()
@@ -260,6 +270,8 @@ class true:
     def simplify(self):
         return self
 
+    def deduplicate(self): return self
+
     def nnf(self):
         return self
 
@@ -283,6 +295,8 @@ class false:
 
     def simplify(self):
         return self
+
+    def deduplicate(self): return self
 
     def nnf(self):
         return self

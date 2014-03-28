@@ -1,5 +1,5 @@
 from logConstructs import *
-
+from random import shuffle
 
 class SAT_solver:
 
@@ -53,6 +53,18 @@ class SAT_solver:
 
         return {i: j for i, j in result.items() if j is not None}
     
+    @staticmethod
+    def canreturn(formula, result_dict):
+        if formula.__class__.__name__ == "true":
+            return True, result_dict
+        elif formula.__class__.__name__ == "false":
+            return True, {}
+        elif formula.__class__.__name__ != "And":
+            return True, {}
+        elif len(formula.clause) == 0:
+            return True, result_dict
+        return False, result_dict
+    
     def solve(self, formula):
         formula = formula.nnf().cnf().simplify().deduplicate()
         return self.solve_cnf(formula, {})
@@ -60,20 +72,32 @@ class SAT_solver:
     def solve_cnf(self, formula, result_dict):
         temp = result_dict.copy()
         while True:
-            if formula.__class__.__name__ != "And": return temp
+            flag, temp = SAT_solver.canreturn(formula, temp)
+            if flag: return temp
             result = SAT_solver.up(formula)
-            if result is None: return {}
-            if result == {}: break
+            if result is None:
+                return {}
             formula = formula.evaluate(result)
+            if result == {}:
+                break
             temp.update(result)
 
+        flag, temp = SAT_solver.canreturn(formula, temp)
+        if flag: return temp
+
         while True:
-            if formula.__class__.__name__ != "And": return temp
+            flag, temp = SAT_solver.canreturn(formula, temp)
+            if flag: return temp
             values = SAT_solver.purge(formula)
             if values == {}: break
             formula = formula.evaluate(values)
             temp.update(values)
 
+        flag, temp = SAT_solver.canreturn(formula, temp)
+        if flag: return temp
+
+        # calculate the occurence count for each variable and return the max one
+        #print "formula:", unicode(formula), temp
         freq = {}
         maxvar_name = ""
         maxvar_count = -1
@@ -88,8 +112,13 @@ class SAT_solver:
                 if num>maxvar_count:
                     maxvar_name = name
                     maxvar_count = num
+        if maxvar_name == "":
+            print "maxvar_name is empty", len(formula.clause), unicode(formula)
+            #return {}
 
-        for val in [True, False]:
+        literals = [True, False]
+        shuffle(literals)
+        for val in literals:
             temp[maxvar_name] = val
             ret = self.solve_cnf(formula.evaluate({maxvar_name: val}), temp)
             if ret != {}:
