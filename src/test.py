@@ -1,23 +1,9 @@
 #!/usr/bin/env python
-
+import unittest
 from logConstructs import *
 from sat import SAT_solver
 
-print "================================================="
-print "CNF"
-print "================================================="
-expr = Or([
-    Var("p"),
-    And([
-        Var("q"),
-        Var("p")
-        ])
-])
-expr2 = Var("p")
-expr3 = Or([Var("p"), Var("q")])
-expr4 = Or([And([Var("p"), Var("q")]), Var("h"), And([Var("g"), Var("k")])])
-expr5 = true()
-expr6 = false()
+
 expr7 = And([Var("p"), Var("q")])
 expr8 = And([Var("x1"),Or([Var("x2"),And([Var("x3"),Var("x4")])])])
 expr9 = Or([Var("x1"),Not(Var("x2")),And([Var("x2"),Var("x3")]),Var("x4")])
@@ -25,22 +11,6 @@ expr10 = Or([And([Var("x1"),Var("x2"),Var("x3")]),And([Not(Var("x4")),Var("x1")]
 expr11 = Or([And([Var("x1"),Var("x2")]),And([Var("x3"),Var("x4")]),And([Var("x2"),Var("x3"),Not(Var("x4"))])])
 expr12 = And([Var("x1"), Not(Var("x1"))])
 expr13 = Or([ And([Var("a"), Not(Var("b"))]), And([Not(Var("a")), Var("b")]) ])
-
-print "Expression: " + unicode(expr2)
-print "Expression (CNF): "+ unicode(expr2.cnf())
-print "Expression: " + unicode(expr5)
-print "Expression (CNF): "+ unicode(expr5.cnf())
-print "Expression: " + unicode(expr6)
-print "Expression (CNF): "+ unicode(expr6.cnf())
-print "Expression: " + unicode(expr3)
-print "Expression (CNF): "+ unicode(expr3.cnf())
-print "Expression: " + unicode(expr7)
-print "Expression (CNF): "+ unicode(expr7.cnf())
-print "Expression: " + unicode(expr)
-print "Expression (CNF): "+ unicode(expr.cnf())
-print "Expression: " + unicode(expr4)
-print "Expression (CNF): "+ unicode(expr4.cnf())
-print "================================================="
 
 expr = And([
     Or([
@@ -76,17 +46,6 @@ print "Expression (p->True): " + unicode(newexpr2)
 print "Expression (z->True): " + unicode(newexpr3)
 
 print "================================================="
-print "================================================="
-print "Testing simplify method."
-print "================================================="
-print "Expression: " + unicode(expr)
-print "Expression (p -> False): " + unicode(expr.evaluate({"p": False}))
-print "Expression (p -> True): " + unicode(expr.evaluate({"p": True}))
-emptyexpr = And([Or([])])
-print "Expression " + unicode(emptyexpr) + ": " + unicode(emptyexpr.evaluate({}))
-print "================================================="
-
-print "================================================="
 print "Testing deduplicate method."
 print "================================================="
 dedupexpr = And([ Or([Var("x1"), Var("x2")]) ])
@@ -95,14 +54,15 @@ dedupexpr = And([ Or([Var("x1"), Var("x1")]) ])
 print "Expession: " + unicode(dedupexpr) + " -> " + unicode(dedupexpr.deduplicate())
 
 print "================================================="
-solver = SAT_solver()
 print "================================================="
 print "SAT Solver Testing"
 print "================================================="
+solver = SAT_solver()
 for i in globals().keys():
     if i[:4] == "expr":
         print i, ":", unicode(globals()[i]), "->", solver.solve(globals()[i])
 
+print unicode(true()), "->", solver.solve(true())
 print "================================================="
 print "sudoku"
 from sudoku import sudoku
@@ -185,3 +145,6 @@ f = graph_coloring(g, 3)[0]
 print "g3:", unicode(f), "->", solver.solve(f)
 f = graph_coloring(g, 4)[0]
 print "g4:", unicode(f), "->", solver.solve(f)
+
+if __name__ == "__main__":
+    unittest.main()
