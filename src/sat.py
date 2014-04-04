@@ -73,28 +73,28 @@ class SAT_solver:
         temp = result_dict.copy()
         while True:
             flag, temp = SAT_solver.canreturn(formula, temp)
-            if flag: return temp
+            if flag: return (True, temp)
             result = SAT_solver.up(formula)
             if result is None:
-                return {}
+                return (False, {})
             formula = formula.evaluate(result)
             if result == {}:
                 break
             temp.update(result)
 
         flag, temp = SAT_solver.canreturn(formula, temp)
-        if flag: return temp
+        if flag: return (True, temp)
 
         while True:
             flag, temp = SAT_solver.canreturn(formula, temp)
-            if flag: return temp
+            if flag: return (True, temp)
             values = SAT_solver.purge(formula)
             if values == {}: break
             formula = formula.evaluate(values)
             temp.update(values)
 
         flag, temp = SAT_solver.canreturn(formula, temp)
-        if flag: return temp
+        if flag: return (True, temp)
 
         # calculate the occurence count for each variable and return the max one
         #print "formula:", unicode(formula), temp
@@ -120,12 +120,12 @@ class SAT_solver:
         shuffle(literals)
         for val in literals:
             temp[maxvar_name] = val
-            ret = self.solve_cnf(formula.evaluate({maxvar_name: val}), temp)
+            ret = (self.solve_cnf(formula.evaluate({maxvar_name: val}), temp))[1]
             if ret != {}:
                 temp.update(ret)
-                return temp
+                return (True, temp)
 
-        return {}
+        return (False, {})
 
         #=============================================
         #multithreading - spliting search
