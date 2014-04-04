@@ -1,17 +1,19 @@
 #!/usr/bin/env python
 
+'''Logicni elementi za Boolove formule.'''
+
 
 class Var:
-
+    '''Razred za spremenljivke.'''
     def __init__(self, name):
         self.name = name
 
     def evaluate(self, assignments={}):
+        '''Funkcija, ki vraca vrednost spremenljivke.'''
         return (self.setVariables(assignments))
 
     def setVariables(self, assignments={}):
-        '''Returns true(), false() or copy of itself
-        depending on assignments.'''
+        '''Vrne true(), false() ali kopijo sebe.'''
 
         if(self.name in assignments):
             if(assignments[self.name]):
@@ -22,13 +24,17 @@ class Var:
         return Var(self.name)
 
     def simplify(self):
+        '''Poenostavitev.'''
         return self
 
     def nnf(self):
+        '''Negacijska normalna oblika.'''
         return self
 
     def cnf(self):
-        #assume NNF
+        '''Konjuktivna normalna oblika.
+
+           Formula mora biti v negacijski normalni obliki.'''
         return And([Or([self])])
 
     def __unicode__(self):
@@ -36,35 +42,41 @@ class Var:
 
 
 class Or:
-
+    '''Razred za disjunkcijo.'''
     def __init__(self, l):
         self.clause = l
 
     def evaluate(self, assignments={}):
+        '''Funkcija, ki delno evaluira formulo in jo poenostavi.'''
         return (self.setVariables(assignments)).simplify()
 
     def setVariables(self, assignments={}):
+        '''Funkcija, ki delno evaluira formulo.'''
         return Or(map(lambda x: x.setVariables(assignments), self.clause))
 
     def simplify(self):
+        '''Poenostavitev.'''
         if len(self.clause) == 0:
             return false()
 
         ret = Or(map(lambda x: x.simplify(), self.clause))
 
+        #odstrani neresnice
         ret.clause = filter(lambda x: x.__class__.__name__ != "false",
                             ret.clause)
 
+        #absorpcija (A or True = True)
         if "true" in map(lambda x: x.__class__.__name__, ret.clause):
             return true()
 
+        #identiteta za disjunkcijo
         if len(ret.clause) == 0:
             return false()
 
         return ret
 
     def deduplicate(self):
-        # eliminate duplicate variable instances (and treat negations separately)
+        '''Funkcija, ki odstrani podvojene literale.'''
         i = 0
         varlist = set()
         negvars = set()
@@ -85,18 +97,24 @@ class Or:
         return self
 
     def nnf(self):
+        '''Negacijska normalna oblika.'''
         return Or(map(lambda x: x.nnf(), self.clause))
 
     def cnf(self):
-        #assume NNF
+        '''Konjuktivna normalna oblika.
 
+           Formula mora biti v negacijski normalni obliki.'''
+         
+        #=================================================
         #PSEUDOCODE
+        #=================================================
         #remove all nested or classes
         #apply distribution if there are and classes
         #if there are no and classes only thing which remains are literals
             #return and(or(literals))
-
         #remove nested ors
+        #=================================================
+
         newselfclauses = self.clause
         ors = True
         while ors:
@@ -114,13 +132,13 @@ class Or:
             newselfclauses = newclause
 
 
-        #apply distribution
+        #uporabi distributivni zakon
         for i in xrange(len(newclause)):
             if newclause[i].__class__.__name__ == "And":
                 complement = newclause[:i] + newclause[i+1:]
                 return And(map(lambda x: Or(complement+[x]).deduplicate(), newclause[i].clause)).cnf()
 
-        #return cnf
+        #vrni formulo v konjuktivni normalni obliki
         return And([Or(newclause).deduplicate()])
 
     def __unicode__(self):
@@ -128,53 +146,65 @@ class Or:
 
 
 class And:
-
+    '''Razred za konjunkcijo.'''
     def __init__(self, l):
         self.clause = l
 
     def evaluate(self, assignments={}):
+        '''Funkcija, ki delno evaluira formulo in jo poenostavi.'''
         return (self.setVariables(assignments)).simplify()
 
     def setVariables(self, assignments={}):
+        '''Funkcija, ki delno evaluira formulo.'''
         return And(map(lambda x: x.setVariables(assignments), self.clause))
 
     def simplify(self):
-
+        '''Poenostavitev.'''
         if len(self.clause) == 0:
             return true()
 
         ret = And(map(lambda x: x.simplify(), self.clause))
 
+        #odstrani resnice
         ret.clause = filter(lambda x: x.__class__.__name__ != "true",
                             ret.clause)
 
+        #absorpcija (A and False = False)
         if "false" in map(lambda x: x.__class__.__name__, ret.clause):
             return false()
 
+        #identiteta za konjunkcijo
         if len(ret.clause) == 0:
             return true()
 
         return ret
 
     def deduplicate(self):
+        '''Funkcija, ki odstrani podvojene literale.'''
         self.clause = map(lambda x: x.deduplicate(), self.clause)
         return self
 
     def nnf(self):
+        '''Negacijska normalna oblika.'''
         return And(map(lambda x: x.nnf(), self.clause))
 
     def cnf(self):
-        #assume NNF
+        '''Konjuktivna normalna oblika.
 
+           Formula mora biti v negacijski normalni obliki.'''
+ 
+        #=================================================
         #PSEUDOCODE
+        #=================================================
         #propagate cnf
         #remove all nested ands
-        #onley thing which remains are or classes - return And(ors)
+        #only thing which remains are or classes - return And(ors)
+        #=================================================
 
-        #propagate cnf
+        #pretvori stavke v konjuktivno normalno obliko
         newselfclauses = map(lambda x: x.cnf(), self.clause)
 
-        #remove all nested Ands
+        #odstrani vgnezdene konjunkcije
         ands = True
         while ands:
             ands = False
@@ -189,7 +219,7 @@ class And:
 
             newselfclauses = newclause
 
-        #return cnf
+        #vrni formulo v konjuktivni normalni obliki
         return And(newclause)
 
     def __unicode__(self):
@@ -197,16 +227,20 @@ class And:
 
 
 class Not:
+    '''Razred za negacijo.'''
     def __init__(self, l):
         self.clause = l
 
     def evaluate(self, assignments={}):
+        '''Funkcija, ki delno evaluira formulo in jo poenostavi.'''
         return (self.setVariables(assignments)).simplify()
 
     def setVariables(self, assignments={}):
+        '''Funkcija, ki delno evaluira formulo.'''
         return Not(self.clause.setVariables(assignments))
 
     def simplify(self):
+        '''Poenostavitev.'''
         formula = self.clause.simplify()
         name = formula.__class__.__name__
 
@@ -217,28 +251,38 @@ class Not:
         else:
             return Not(formula)
 
-    def deduplicate(self): return self
+    def deduplicate(self): 
+        return self
 
     def nnf(self):
+        '''Negacijska normalna oblika.'''
+
+        #DeMorganov zakon
         if self.clause.__class__.__name__ == "And":
             return Or(map(lambda x: Not(x), self.clause.clause)).nnf()
 
+        #DeMorganov zakon
         if self.clause.__class__.__name__ == "Or":
             return And(map(lambda x: Not(x), self.clause.clause)).nnf()
 
+        #dvojna negacija
         if self.clause.__class__.__name__ == "Not":
             return self.clause.clause.nnf()
 
+        #neresnica postane resnica
         if self.clause.__class__.__name__ == "false":
             return true()
 
+        #resnica postane neresnica
         if self.clause.__class__.__name__ == "true":
             return false()
 
         return Not(self.clause.nnf())
 
     def cnf(self):
-        #assume NNF
+       '''Konjuktivna normalna oblika.
+
+           Formula mora biti v negacijski normalni obliki.'''
         return And([Or([self])])
 
     def __unicode__(self):
@@ -246,6 +290,8 @@ class Not:
 
 
 class true:
+
+    '''Razred za resnico.'''
 
     def evaluate(self, assignments={}):
         return true()
@@ -259,7 +305,6 @@ class true:
         return self
 
     def cnf(self):
-        #assume NNF
         return And([Or([self])])
 
     def setVariables(self, assignments={}):
@@ -270,6 +315,8 @@ class true:
 
 
 class false:
+
+    '''Razred za neresnico.'''
 
     def evaluate(self, assignments={}):
         return false()
@@ -283,7 +330,6 @@ class false:
         return self
 
     def cnf(self):
-        #assume NNF
         return And([Or([self])])
 
     def setVariables(self, assignments={}):
