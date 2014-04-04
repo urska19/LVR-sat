@@ -5,6 +5,7 @@ sys.path.append("..")
 from sat import SAT_solver
 from logConstructs import *
 from graphColoring import graph_coloring
+from sudoku import sudoku
 
 
 class TestSAT(unittest.TestCase):
@@ -155,6 +156,26 @@ class TestSAT(unittest.TestCase):
         solution = solver.solve(formula)
         self.assertTrue(solution[0])
         self.assertEqual("true", formula.nnf().cnf().evaluate(solution[1]).__class__.__name__)
+
+    def test_Sudoku1(self):
+
+        solver = SAT_solver()
+        board=[[4, 8, None, 1, 6, None, None, None, 7],
+         [1, None, 7, 4, None, 3, 6, None, None],
+         [3, None, None, 5, None, None, 4, 2, None],
+         [None, 9, None, None, 3, 2, 7, None, 4],
+         [None, None, None, None, None, None, None, None, None],
+         [2, None, 4, 8, 1, None, None, 6, None],
+         [None, 4, 1, None, None, 8, None, None, 6],
+         [None, None, 6, 7, None, 1, 9, None, 3],
+         [7, None, None, None, 9, 6, None, 4, None]]
+
+        formula = sudoku(board)[0]
+        solution = solver.solve(formula)
+
+        self.assertTrue(solution[0])
+        self.assertEqual("true", formula.nnf().cnf().evaluate(solution[1]).__class__.__name__)
+
 
 if __name__ == "__main__":
     suite = unittest.TestLoader().loadTestsFromTestCase(TestSAT)
