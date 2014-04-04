@@ -147,6 +147,3 @@ f = graph_coloring(g, 4)[0]
 print "g4:", unicode(f), "->", solver.solve(f)
 
 print "Test true(): ", solver.solve(true())
-
-if __name__ == "__main__":
-    unittest.main()
