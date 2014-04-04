@@ -6,9 +6,6 @@ class Var:
     def __init__(self, name):
         self.name = name
 
-    def value(self, assignments):
-        return assignments[self.name]
-
     def evaluate(self, assignments={}):
         return (self.setVariables(assignments))
 
@@ -43,10 +40,6 @@ class Or:
     def __init__(self, l):
         self.clause = l
 
-    def value(self, assignments):
-        return reduce(lambda x, y: x or y,
-                      map(lambda x: x.value(assignments), self.clause))
-
     def evaluate(self, assignments={}):
         return (self.setVariables(assignments)).simplify()
 
@@ -64,7 +57,7 @@ class Or:
 
         if "true" in map(lambda x: x.__class__.__name__, ret.clause):
             return true()
-	
+
         if len(ret.clause) == 0:
             return false()
 
@@ -73,10 +66,10 @@ class Or:
     def deduplicate(self):
         # eliminate duplicate variable instances (and treat negations separately)
         i = 0
-	varlist = set()
+        varlist = set()
         negvars = set()
         while i<len(self.clause):
-	    if self.clause[i].__class__.__name__ == "Var":
+            if self.clause[i].__class__.__name__ == "Var":
                 if self.clause[i].name in varlist:
                     del self.clause[i]
                     i-=1
@@ -138,10 +131,6 @@ class And:
 
     def __init__(self, l):
         self.clause = l
-
-    def value(self, assignments):
-        return reduce(lambda x, y: x and y, map(lambda x: x.value(assignments),
-                                                self.clause))
 
     def evaluate(self, assignments={}):
         return (self.setVariables(assignments)).simplify()
@@ -211,10 +200,6 @@ class Not:
     def __init__(self, l):
         self.clause = l
 
-    #should not be used
-    def value(self, assignments):
-        return not self.clause.value(assignments)
-
     def evaluate(self, assignments={}):
         return (self.setVariables(assignments)).simplify()
 
@@ -261,8 +246,6 @@ class Not:
 
 
 class true:
-    def value(self, assignments):
-        return True
 
     def evaluate(self, assignments={}):
         return true()
@@ -287,8 +270,6 @@ class true:
 
 
 class false:
-    def value(self, assignments):
-        return False
 
     def evaluate(self, assignments={}):
         return false()
@@ -320,12 +301,6 @@ def main():
     print unicode(expr1)
     print unicode(expr2)
 
-    # second task
-    for p in (False, True):
-        for q in (False, True):
-            print expr1.value({"p": p, "q": q}), " == ",
-            expr2.value({"p": p, "q": q})
-
     # third task
     print unicode(expr1.simplify())
     print unicode(expr2.simplify())
@@ -343,17 +318,6 @@ def main():
     def pretty(expr):
         print unicode(expr) + " => " + unicode(expr.simplify())
 
-    def test(expr, varlist, assignments={}):
-        if len(varlist) == 0:
-            print ""
-            pretty(expr)
-            print `assignments` + " -> " + `expr.value(assignments)`
-            return
-
-        for i in [False, True]:
-            assignments[varlist[0]] = i
-            test(expr, varlist[1:], assignments)
-
     expr = Or([
         Var("p"),
         And([
@@ -362,7 +326,6 @@ def main():
             ])
     ])
 
-    test(expr,  ["p", "q"])
     print "================================================="
     print "CNF"
     print "================================================="
@@ -396,18 +359,6 @@ def main():
     print "Expression (CNF): "+ unicode(expr4.cnf())
     print "================================================="
 
-    print "================================================="
-    print "Test function."
-    print "================================================="
-    expr = And([
-        Or([
-            Not(Var("p")),
-            Var("q")
-        ]),
-        Var("p")
-    ])
-    test(expr, ["p", "q"])
-    print "================================================="
     print "================================================="
     print "Testing setVariables method."
     print "================================================="
