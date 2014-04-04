@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 from logConstructs import *
-from sat import *
+
 
 def graph_coloring(graph, colors):
 
@@ -37,61 +37,3 @@ def graph_coloring(graph, colors):
 
     #simplifying formula
     return (main_formula.simplify(), variable_names)
-
-
-def solveGraphColoring(graph, colors):
-    (formula, variableNames) = graph_coloring(graph, colors)
-    return evaluateFormula(formula, variableNames)
-
-
-def main():
-    graph = [
-        [1, 1, 1],
-        [1, 1, 1],
-        [1, 1, 1],
-    ]
-
-    colors = 2
-
-#    print graph
-    print solveGraphColoring(graph, colors)
-
-    graph = [
-        [1, 0, 0],
-        [0, 1, 0],
-        [0, 0, 1],
-    ]
-
-#     print graph
-    print solveGraphColoring(graph, colors)
-
-    lih_cikel=[
-        [0, 1, 1],
-        [1, 0, 1],
-        [1, 1, 0],
-    ]
-
-    sod_cikel=[
-        [0, 1, 0, 1],
-        [1, 0, 1, 0],
-        [0, 1, 0, 1],
-        [1, 0, 1, 0],
-    ]
-
-    g=[
-        [0, 1, 1, 1, 1],
-        [1, 0, 1, 1, 0],
-        [1, 1, 0, 1, 0],
-        [1, 1, 1, 0, 1],
-        [1, 0, 0, 1, 0]
-    ]
-
-
-    print solveGraphColoring(sod_cikel, 2)
-    print solveGraphColoring(lih_cikel, 2)
-    print solveGraphColoring(g, 2)
-    print solveGraphColoring(g, 3)
-    print solveGraphColoring(g, 4)
-
-if __name__ == '__main__':
-    main()
