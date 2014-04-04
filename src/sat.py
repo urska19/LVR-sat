@@ -73,7 +73,13 @@ class SAT_solver:
         temp = result_dict.copy()
         while True:
             flag, temp = SAT_solver.canreturn(formula, temp)
-            if flag: return (True, temp)
+
+            if flag:
+                if formula.__class__.__name__ == "true":
+                    return (True, temp)
+                else:
+                    return (False, temp)
+
             result = SAT_solver.up(formula)
             if result is None:
                 return (False, {})
@@ -87,14 +93,25 @@ class SAT_solver:
 
         while True:
             flag, temp = SAT_solver.canreturn(formula, temp)
-            if flag: return (True, temp)
+
+            if flag:
+                if formula.__class__.__name__ == "true":
+                    return (True, temp)
+                else:
+                    return (False, temp)
+
             values = SAT_solver.purge(formula)
             if values == {}: break
             formula = formula.evaluate(values)
             temp.update(values)
 
         flag, temp = SAT_solver.canreturn(formula, temp)
-        if flag: return (True, temp)
+        if flag:
+            if formula.__class__.__name__ == "true":
+                return (True, temp)
+            else:
+                return (False, temp)
+
 
         # calculate the occurence count for each variable and return the max one
         #print "formula:", unicode(formula), temp
