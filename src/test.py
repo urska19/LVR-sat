@@ -72,7 +72,7 @@ def printsudoku(a):
             print " %d "%(col) if col else " _ ",
         print ""
 
-board=[[None, 8, None, 1, 6, None, None, None, 7],
+board=[[4, 8, None, 1, 6, None, None, None, 7],
  [1, None, 7, 4, None, 3, 6, None, None],
  [3, None, None, 5, None, None, 4, 2, None],
  [None, 9, None, None, 3, 2, 7, None, 4],
@@ -113,7 +113,7 @@ graph = [
     [0, 0, 1],
 ]
 f = graph_coloring(graph, colors)[0]
-print "graph: ", unicode(f), "->", solver.solve(f)
+print "graph: ", unicode(f), "->", solver.solve(f)[1]
 
 sod_cikel=[
     [0, 1, 0, 1],
@@ -145,6 +145,8 @@ f = graph_coloring(g, 3)[0]
 print "g3:", unicode(f), "->", solver.solve(f)
 f = graph_coloring(g, 4)[0]
 print "g4:", unicode(f), "->", solver.solve(f)
+
+print "Test true(): ", solver.solve(true())
 
 if __name__ == "__main__":
     unittest.main()
