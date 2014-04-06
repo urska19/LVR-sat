@@ -185,8 +185,9 @@ board=[[4, 8, None, 1, 6, None, None, None, 7],
  [7, None, None, None, 9, 6, None, 4, None]]
 printsudoku(board)
 import sys
-formula = sudoku(board)[0]
-sys.stderr.write( unicode(sudoku(board)[0].nnf().cnf().simplify()).encode("utf-8") )
-result = solver.solve(sudoku(board)[0])
+# formula = sudoku(board)[0]
+formula = sudoku(board)
+# sys.stderr.write( unicode(sudoku(board)[0].nnf().cnf().simplify()).encode("utf-8") )
+result = solver.solve(formula)
 evaluated = formula.nnf().cnf().deduplicate().evaluate(result)
 print result, unicode(evaluated)

@@ -48,8 +48,4 @@ def square_conditions():
     return And(ret)
 
 def sudoku(a):
-    formula=And([fill_conditions(a),row_conditions(),col_conditions(),square_conditions()])
-    #formula=And([fill_conditions(a)])
-    #formula = And([row_conditions(),col_conditions(),square_conditions()])
-    variableNames = [ "%d%d%d"%(y,x,v) for v in range(1,10) for x in range(9) for y in range(9)]
-    return (formula, variableNames)
+    return And([fill_conditions(a),row_conditions(),col_conditions(),square_conditions()])

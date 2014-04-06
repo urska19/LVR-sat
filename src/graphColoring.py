@@ -31,9 +31,4 @@ def graph_coloring(graph, colors):
 
     main_formula = And(subformula + main_formula.clause)
 
-    #constructing variable names
-    variable_names = map(lambda x: x.name,
-                         reduce(lambda x, y: x + y, variables))
-
-    #simplifying formula
-    return (main_formula.simplify(), variable_names)
+    return main_formula.simplify()
