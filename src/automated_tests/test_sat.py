@@ -61,7 +61,7 @@ class TestSAT(unittest.TestCase):
             [1, 1, 1],
         ]
         colors = 2
-        formula = graph_coloring(graph, colors)[0]
+        formula = graph_coloring(graph, colors)
         solution = solver.solve(formula)
         self.assertFalse(solution[0])
 
@@ -75,7 +75,7 @@ class TestSAT(unittest.TestCase):
         ]
 
         colors = 3
-        formula = graph_coloring(graph, colors)[0]
+        formula = graph_coloring(graph, colors)
         solution = solver.solve(formula)
         self.assertTrue(solution[0])
         self.assertEqual("true", formula.nnf().cnf().evaluate(solution[1]).__class__.__name__)
@@ -91,7 +91,7 @@ class TestSAT(unittest.TestCase):
         ]
 
         colors = 2
-        formula = graph_coloring(graph, colors)[0]
+        formula = graph_coloring(graph, colors)
         solution = solver.solve(formula)
         self.assertTrue(solution[0])
         self.assertEqual("true", formula.nnf().cnf().evaluate(solution[1]).__class__.__name__)
@@ -106,7 +106,7 @@ class TestSAT(unittest.TestCase):
         ]
 
         colors = 2
-        formula = graph_coloring(graph, colors)[0]
+        formula = graph_coloring(graph, colors)
         solution = solver.solve(formula)
         self.assertFalse(solution[0])
 
@@ -122,7 +122,7 @@ class TestSAT(unittest.TestCase):
         ]
 
         colors = 2
-        formula = graph_coloring(graph, colors)[0]
+        formula = graph_coloring(graph, colors)
         solution = solver.solve(formula)
         self.assertFalse(solution[0])
 
@@ -137,7 +137,7 @@ class TestSAT(unittest.TestCase):
         ]
 
         colors = 3
-        formula = graph_coloring(graph, colors)[0]
+        formula = graph_coloring(graph, colors)
         solution = solver.solve(formula)
         self.assertFalse(solution[0])
 
@@ -152,7 +152,7 @@ class TestSAT(unittest.TestCase):
         ]
 
         colors = 4
-        formula = graph_coloring(graph, colors)[0]
+        formula = graph_coloring(graph, colors)
         solution = solver.solve(formula)
         self.assertTrue(solution[0])
         self.assertEqual("true", formula.nnf().cnf().evaluate(solution[1]).__class__.__name__)
@@ -170,7 +170,7 @@ class TestSAT(unittest.TestCase):
          [None, None, 6, 7, None, 1, 9, None, 3],
          [7, None, None, None, 9, 6, None, 4, None]]
 
-        formula = sudoku(board)[0]
+        formula = sudoku(board)
         solution = solver.solve(formula)
 
         self.assertTrue(solution[0])
@@ -191,7 +191,7 @@ class TestSAT(unittest.TestCase):
          [7, 2, None, 1, None, None, None, None, None],
          [None, 8, None, None, None, 9, None, 2, None]]
 
-        formula = sudoku(board)[0]
+        formula = sudoku(board)
         solution = solver.solve(formula)
 
         self.assertTrue(solution[0])
@@ -212,7 +212,7 @@ class TestSAT(unittest.TestCase):
          [2, None, 7, None, 4, 5, None, 8, 6],
          [5, None, None, None, None, None, None, None, None]]
 
-        formula = sudoku(board)[0]
+        formula = sudoku(board)
         solution = solver.solve(formula)
 
         self.assertTrue(solution[0])
