@@ -4,22 +4,20 @@ from logConstructs import *
 
 # boxes: (row, col, num)
 
-# ensure that every box is filled
+# ensure that every box is filled with one or more values
 def fill_conditions(a):
     ret=[]
-    for i in range(1): # row
-        for j in range(1): # col
-            r=[a[i][j]] if a[i][j] else range(1,10) # all the possible values for this box
-            disj=[]
-            for k in r: # fix one value for this box
-                conj=[Var("%d%d%d"%(i,j,k))]
-                for l in range(1,10): # other values for this box
-                    v=Var("%d%d%d"%(i,j,l))
-                    if k!=l:
-                        conj.append(Not(v))
-                disj.append(And(conj))
+    for i in range(9): # row
+        for j in range(9): # col
+            disj = []
+            if a[i][j] is not None:
+                disj.append(Var("%d%d%d" % (i, j, a[i][j])))
+            else:
+                disj = map(lambda x: Var("%d%d%d" % (i, j, x)), range(1, 10))
+
             ret.append(Or(disj))
     return And(ret)
+
 def row_conditions():
     ret=[]
     for i in range(9): # row
