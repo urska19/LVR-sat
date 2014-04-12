@@ -9,6 +9,6 @@ if __name__ == "__main__":
     suite2 = unittest.TestLoader().loadTestsFromModule(test_simplify_basic)
     suite3 = unittest.TestLoader().loadTestsFromModule(test_sat)
 
-    alltests = unittest.TestSuite([suite1, suite2])
+    alltests = unittest.TestSuite([suite1, suite2, suite3])
 
     unittest.TextTestRunner(verbosity=2).run(alltests)
