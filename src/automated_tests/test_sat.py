@@ -176,8 +176,6 @@ class TestSAT(unittest.TestCase):
         self.assertTrue(solution[0])
         self.assertEqual("true", formula.nnf().cnf().evaluate(solution[1]).__class__.__name__)
 
-    @unittest.SkipTest
-    @unittest.expectedFailure
     def test_SudokuEasy(self):
 
         solver = SAT_solver()
@@ -197,8 +195,6 @@ class TestSAT(unittest.TestCase):
         self.assertTrue(solution[0])
         self.assertEqual("true", formula.nnf().cnf().evaluate(solution[1]).__class__.__name__)
 
-    @unittest.SkipTest
-    @unittest.expectedFailure
     def test_SudokuMedium(self):
 
         solver = SAT_solver()
