@@ -2,6 +2,7 @@
 import unittest
 from logConstructs import *
 from sat import SAT_solver
+from sudoku import sudoku, printSudoku
 
 
 def logTests():
@@ -167,12 +168,6 @@ for i in globals().keys():
 print unicode(true()), "->", solver.solve(true())
 print "================================================="
 print "sudoku"
-from sudoku import sudoku
-def printsudoku(a):
-    for line in a:
-        for col in line:
-            print " %d "%(col) if col else " _ ",
-        print ""
 
 board=[[4, 8, None, 1, 6, None, None, None, 7],
  [1, None, 7, 4, None, 3, 6, None, None],
@@ -183,11 +178,13 @@ board=[[4, 8, None, 1, 6, None, None, None, 7],
  [None, 4, 1, None, None, 8, None, None, 6],
  [None, None, 6, 7, None, 1, 9, None, 3],
  [7, None, None, None, 9, 6, None, 4, None]]
-printsudoku(board)
+
+print printSudoku(board)
+
 import sys
 # formula = sudoku(board)[0]
 formula = sudoku(board)
 # sys.stderr.write( unicode(sudoku(board)[0].nnf().cnf().simplify()).encode("utf-8") )
 result = solver.solve(formula)
 evaluated = formula.nnf().cnf().deduplicate().evaluate(result)
-print result, unicode(evaluated)
+# print result, unicode(evaluated)

@@ -47,3 +47,84 @@ def square_conditions():
 
 def sudoku(a):
     return And([fill_conditions(a),row_conditions(),col_conditions(),square_conditions()])
+
+def printSudoku(a):
+
+    i = j = 0
+    result = ""
+
+    for i in range(9):
+
+        if i % 3 == 0:
+            for j in range(13):
+                result += "---"
+            result += "\n"
+
+        result += "|| "
+
+        for j in range(9):
+
+            if j % 3 == 0 and j != 0:
+                result += " | "
+
+            if a[i][j] is None:
+                result += " - "
+            else:
+                result += " " + str(a[i][j]) + " "
+
+        result += " ||"
+
+        result += "\n"
+
+    for j in range(13):
+        result += "---"
+    result += "\n"
+
+    return result
+
+def processResult(result):
+    #=====================================================================
+    #initialize empty board
+    #initialize posibility board
+
+    #for all keys in result
+    #   construct coordinates and number
+    #   if empty board is empty on coordinates
+        #   if key is true
+        #       set number to coordinates in the empty board
+        #   else
+        #       remove number from posibility board
+        #       if posibility board in coordinates contains one element
+        #           set element to coordinates in the empty board
+    #return empty board
+    #=====================================================================
+
+    #initialize empty board
+    eboard = []
+    for i in range(9):
+        eboard.append([])
+        for j in range(9):
+            eboard[i].append(None)
+
+    #initialize posibility board
+    pboard = []
+    for i in range(9):
+        pboard.append([])
+        for j in range(9):
+            pboard[i].append([])
+            for k in range(1, 10):
+                pboard[i][j].append(k)
+
+    for key in result:
+        value = result[key]
+        (row, column, number) = (int(key[0]), int(key[1]), int(key[2]))
+
+        if eboard[row][column] is None:
+            if value:
+                eboard[row][column] = number
+            else:
+                pboard[row][column].remove(number)
+                if len(pboard[row][column]) == 1:
+                    eboard[row][column] = pboard[row][column][0]
+
+    return eboard
