@@ -280,9 +280,9 @@ class Not:
         return Not(self.clause.nnf())
 
     def cnf(self):
-       '''Konjuktivna normalna oblika.
+        '''Konjuktivna normalna oblika.
 
-           Formula mora biti v negacijski normalni obliki.'''
+        Formula mora biti v negacijski normalni obliki.'''
         return And([Or([self])])
 
     def __unicode__(self):
