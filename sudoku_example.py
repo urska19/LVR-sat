@@ -27,7 +27,7 @@ board = [[None, 8, None, 1, 6, None, None, None, 7],
         [7, None, None, None, 9, 6, None, 4, None]]
 
 # print sudoku from board definition.
-print "Easy problem:"
+print "Lab exercise:"
 print printSudoku(board)
 
 # construct logical formula from board definition.
