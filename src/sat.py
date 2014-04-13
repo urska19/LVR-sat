@@ -114,27 +114,40 @@ class SAT_solver:
 
 
         # calculate the occurence count for each variable and return the max one
-        #print "formula:", unicode(formula), temp
+        # take into occount negation
         freq = {}
         maxvar_name = ""
         maxvar_count = -1
+        value = True
         for or_clause in formula.clause:
             for elt in or_clause.clause:
+                #get name
+                lvalue = False
                 if elt.__class__.__name__ == "Not":
                     name = elt.clause.name
                 else:
                     name = elt.name
-                num = freq.get(name,0) + 1
-                freq[name] = num
-                if num>maxvar_count:
-                    maxvar_name = name
-                    maxvar_count = num
-        if maxvar_name == "":
-            print "maxvar_name is empty", len(formula.clause), unicode(formula)
-            #return {}
+                    lvalue = True
 
-        literals = [True, False]
-        shuffle(literals)
+                #add one to variable count depending if it is negation or not
+                num = freq.get(name, (0, 0))
+                if lvalue:
+                    num = (num[0] + 1, num[1])
+                else:
+                    num = (num[0], num[1] + 1)
+
+                #check if this variable is maximum occuring variable for now.
+                freq[name] = num
+                if num[0] > maxvar_count:
+                    maxvar_name = name
+                    maxvar_count = num[0]
+                    value = True
+                elif num[1] > maxvar_count:
+                    maxvar_name = name
+                    maxvar_count = num[1]
+                    value = False
+
+        literals = [value, not value]
         for val in literals:
             temp[maxvar_name] = val
             ret = (self.solve_cnf(formula.evaluate({maxvar_name: val}), temp))[1]
