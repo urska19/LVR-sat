@@ -96,3 +96,27 @@ result = solver.solve(sudoku(evil_board))
 print "Solution:"
 # process and print result of sat solver.
 print printSudoku(processResult(result[1]))
+
+#no solution sudoku
+evil_board = [[None, 3, 6, None, 9, None, None, None, 3],
+        [None, None, None, None, None, None, None, 4, 1],
+        [None, None, None, 7, 4, None, None, None, 3],
+        [None, 9, 1, None, None, None, None, None, None],
+        [2, None, None, 5, None, 3, None, None, 6],
+        [None, None, None, None, None, None, 2, 1, None],
+        [5, None, None, None, 2, 4, None, None, None],
+        [6, 8, None, None, None, None, None, None, None],
+        [None, None, None, None, 7, None, 6, 2, None]]
+
+print "Evil problem (no solution):"
+print printSudoku(evil_board)
+
+result = solver.solve(sudoku(evil_board))
+
+print "Solution:"
+
+if not result[0]:
+    print "No solution."
+else:
+    # process and print result of sat solver.
+    print printSudoku(processResult(result[1]))
