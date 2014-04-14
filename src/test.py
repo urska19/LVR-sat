@@ -2,7 +2,7 @@
 import unittest
 from logConstructs import *
 from sat import SAT_solver
-from sudoku import sudoku, printSudoku
+from sudoku import sudoku, printSudoku, processResult
 
 
 def logTests():
@@ -182,9 +182,7 @@ board=[[4, 8, None, 1, 6, None, None, None, 7],
 print printSudoku(board)
 
 import sys
-# formula = sudoku(board)[0]
 formula = sudoku(board)
 # sys.stderr.write( unicode(sudoku(board)[0].nnf().cnf().simplify()).encode("utf-8") )
 result = solver.solve(formula)
-evaluated = formula.nnf().cnf().deduplicate().evaluate(result)
-# print result, unicode(evaluated)
+print printSudoku(processResult(result[1]))
