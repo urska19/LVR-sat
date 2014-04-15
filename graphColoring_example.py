@@ -8,14 +8,14 @@ from sat import SAT_solver
 #instance of sat solver
 solver = SAT_solver()
 
-#graph represented with adjecency matrix
+#graph represented with adjacency matrix
 graph = [
     [1, 1, 1],
     [1, 1, 1],
     [1, 1, 1],
 ]
 
-#nuber of colors for graph coloring
+#number of colors for graph coloring
 colors = 3
 
 #construct formula for certain graph and number of colors

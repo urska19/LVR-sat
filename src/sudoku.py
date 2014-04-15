@@ -85,7 +85,7 @@ def printSudoku(a):
 def processResult(result):
     #=====================================================================
     #initialize empty board
-    #initialize posibility board
+    #initialize possibility board
 
     #for all keys in result
     #   construct coordinates and number
@@ -93,8 +93,8 @@ def processResult(result):
         #   if key is true
         #       set number to coordinates in the empty board
         #   else
-        #       remove number from posibility board
-        #       if posibility board in coordinates contains one element
+        #       remove number from possibility board
+        #       if possibility board in coordinates contains one element
         #           set element to coordinates in the empty board
     #return empty board
     #=====================================================================
@@ -106,7 +106,7 @@ def processResult(result):
         for j in range(9):
             eboard[i].append(None)
 
-    #initialize posibility board
+    #initialize possibility board
     pboard = []
     for i in range(9):
         pboard.append([])

@@ -11,7 +11,7 @@ print "================================================="
 
 solver = SAT_solver()
 
-# define bord as follows.
+# define board as follows.
 # board is array with nine arrays (rows).
 # rows are arrays of nine elements.
 # elements are None or int in [1,9].

@@ -58,8 +58,8 @@ print "expr in  nnf: ", unicode(expr5.nnf())
 #
 #returns - new formula in cnf.
 #==========================================
-#Algorithm is design by reducing complexity recursivly.
-#Could be faster by using cartesian product.
+#Algorithm is design by reducing complexity recursively.
+#Could be faster by using Cartesian product.
 #==========================================
 print "================================================="
 print "Change to CNF"
@@ -117,7 +117,7 @@ print "Expession: " + unicode(dedupexpr) + " -> " + unicode(dedupexpr.deduplicat
 #==========================================
 # Set variables
 #==========================================
-# argument - dictionary of variable name: bolean value
+# argument - dictionary of variable name: boolean value
 #          - dictionary can represent subset of variables
 # returns  new formula
 #==========================================
@@ -148,7 +148,7 @@ print "Evaluate (x->True): " + unicode(expr4.nnf().cnf().deduplicate().evaluate(
 # SAT solver
 #==========================================
 # argument - formula
-# returns - (bolean value, dictionary)
+# returns - (boolean value, dictionary)
 #         - value indicates if formula is satisfiable.
 #         - dictionary represents mapping of variables.
 #==========================================

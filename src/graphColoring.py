@@ -13,16 +13,16 @@ def graph_coloring(graph, colors):
         for j in range(colors):
             variables[i][j] = Var("X" + str(i) + "" + str(j))
 
-    #construct first subformula - node must be colored
+    #construct first sub formula - node must be colored
     main_formula = And(map(lambda x: Or(x), variables))
 
-    #construct second subformula - node must be colored with one color
+    #construct second sub formula - node must be colored with one color
     subformula = []
     for k in range(colors - 1):
         for l in range(k + 1, colors):
             subformula += map(lambda x: Not(And([x[k], x[l]])), variables)
 
-    #construct third subformula - conected nodes have different colors
+    #construct third sub formula - connected nodes have different colors
     for i in range(len(graph) - 1):
         for j in range(i + 1, len(graph)):
             if graph[i][j] == 1:

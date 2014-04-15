@@ -6,7 +6,7 @@ class SAT_solver:
     @staticmethod
     def up(formula):
         """Return None if there is contradiction and dictionary otherwise."""
-        #filter cluses which contains one element
+        #filter clauses which contains one element
         fformula = filter(lambda x: len(x.clause) == 1, formula.clause)
 
         result = {}
@@ -113,8 +113,8 @@ class SAT_solver:
                 return (False, temp)
 
 
-        # calculate the occurence count for each variable and return the max one
-        # take into occount negation
+        # calculate the occurrence count for each variable and return the max one
+        # take into account negation
         freq = {}
         maxvar_name = ""
         maxvar_count = -1
@@ -136,7 +136,7 @@ class SAT_solver:
                 else:
                     num = (num[0], num[1] + 1)
 
-                #check if this variable is maximum occuring variable for now.
+                #check if this variable is maximum occurring variable for now.
                 freq[name] = num
                 if num[0] > maxvar_count:
                     maxvar_name = name
@@ -158,7 +158,7 @@ class SAT_solver:
         return (False, {})
 
         #=============================================
-        #multithreading - spliting search
+        #multithreading - splitting search
         #=============================================
         #heuristic - some heuristic for variable selection
         #=============================================
