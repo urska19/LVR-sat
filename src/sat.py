@@ -71,6 +71,8 @@ class SAT_solver:
 
     def solve_cnf(self, formula, result_dict):
         temp = result_dict.copy()
+        
+        #upping
         while True:
             flag, temp = SAT_solver.canreturn(formula, temp)
 
@@ -91,6 +93,7 @@ class SAT_solver:
         flag, temp = SAT_solver.canreturn(formula, temp)
         if flag: return (True, temp)
 
+        # purging
         while True:
             flag, temp = SAT_solver.canreturn(formula, temp)
 
@@ -112,8 +115,7 @@ class SAT_solver:
             else:
                 return (False, temp)
 
-
-        # calculate the occurrence count for each variable and return the max one
+        # heuristic - find variable which cancels max num of clauses.
         # take into account negation
         freq = {}
         maxvar_name = ""
@@ -147,6 +149,7 @@ class SAT_solver:
                     maxvar_count = num[1]
                     value = False
 
+        # recursive call
         literals = [value, not value]
         for val in literals:
             temp[maxvar_name] = val
@@ -156,15 +159,3 @@ class SAT_solver:
                 return (True, temp)
 
         return (False, {})
-
-        #=============================================
-        #multithreading - splitting search
-        #=============================================
-        #heuristic - some heuristic for variable selection
-        #=============================================
-        #select a variable v
-        #set v to false, evaluate and call solve_cnf
-        #if return == True return True
-        #set v to true, evaluate and call solve_cnf
-        #if return == True return True
-        #return False
