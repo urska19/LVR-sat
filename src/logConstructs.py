@@ -337,3 +337,56 @@ class false:
 
     def __unicode__(self):
         return u"\u22a5"
+
+class FlatCNF:
+    '''Ucinkovitejsa reprezentacija za formule v konjunktivni normalni obliki.
+       
+       Formulo predstavimo kot seznam mnozic stevil.
+    '''
+
+    def __init__(self, formula):
+        self.variables = set()
+        self.clauses = []
+
+        if formula.__class__.__name__ == "file":
+            self._makefromfile(formula)
+        elif formula.__class__.__name__ in ("And", "Or", "Not", "false", "true", "Var"):
+            self._makefromformula(formula)
+        else:
+            raise Exception("FlatCNF can only be constructed from formulas or CNF files")
+
+    def _makefromformula(self, formula):
+        '''Strukturo sestavimo iz dane poljubne formule.'''
+
+        f = formula.nnf().cnf().simplify().deduplicate()
+
+        '''Nastejemo vse spremenljivke, jih preslikamo v stevila (negativna za negirane spremenljivke)
+           ter sestavimo seznam mnozic, ki predstavlja CNF dane formule.'''
+        varnames = {}
+        nextnumber = 1
+        for or_node in f.clauses:
+            node = set()
+            for var in or_node.clauses:
+                if var.__class__._name__ == "Not":
+                    name = var.clause.name
+                    negate = -1
+                else:
+                    name = var.name
+                    negate = 1
+
+                if name not in varnames:
+                    varnum = nextnumber
+                    nextnumber += 1
+                else:
+                    varnum = varnames[name]
+                
+                varnum *= negate
+                node.add(varnum)
+            self.clauses.append(node)
+
+    def _makefromfile(self, handle):
+        '''Strukturo sestavimo iz formule v datoteki, ki je ze v CNF obliki, z ostevilcenimi spremenljivkami.'''
+
+        with open(handle,"rt") as f:
+            for line in f:
+                self.clause.append(set( map(int,line.split()) ))
