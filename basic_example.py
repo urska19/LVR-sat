@@ -158,7 +158,8 @@ print "================================================="
 solver = SAT_solver()
 for i in globals().keys():
     if i[:4] == "expr":
-        print i, ":", unicode(globals()[i]), "->", solver.solve(globals()[i])
+        print i, ":", unicode(globals()[i]), "-------->", solver.solve(globals()[i])
+        print i, ":", unicode(globals()[i]), "--flat-->", solver.solve(FlatCNF(globals()[i]))
 #
 #
 #==========================================

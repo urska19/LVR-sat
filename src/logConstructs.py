@@ -340,36 +340,44 @@ class false:
 
 class FlatCNF:
     '''Ucinkovitejsa reprezentacija za formule v konjunktivni normalni obliki.
-       
-       Formulo predstavimo kot seznam mnozic stevil.
-    '''
 
-    def __init__(self, formula):
-        self.variables = set()
+Formulo predstavimo kot seznam mnozic stevil.'''
+
+    def __init__(self, formula = None):
         self.clauses = []
+        self.name_mapping = {}
+	if formula is None: return
 
-        if formula.__class__.__name__ == "file":
-            self._makefromfile(formula)
+        if formula.__class__.__name__ in ("file", "str", "list", "tuple"):
+            self._makefromCNF(formula)
         elif formula.__class__.__name__ in ("And", "Or", "Not", "false", "true", "Var"):
             self._makefromformula(formula)
         else:
-            raise Exception("FlatCNF can only be constructed from formulas or CNF files")
+            raise Exception("FlatCNF can only be constructed from formulas, CNF files or CNF lists")
+
+        self.clauses.sort(key = lambda x: len(x))
 
     def _makefromformula(self, formula):
         '''Strukturo sestavimo iz dane poljubne formule.'''
 
-        f = formula.nnf().cnf().simplify().deduplicate()
+        f = formula.nnf().cnf()
 
-        '''Nastejemo vse spremenljivke, jih preslikamo v stevila (negativna za negirane spremenljivke)
-           ter sestavimo seznam mnozic, ki predstavlja CNF dane formule.'''
+        #Nastejemo vse spremenljivke, jih preslikamo v stevila (negativna za negirane spremenljivke)
+        #ter sestavimo seznam mnozic, ki predstavlja CNF dane formule.
         varnames = {}
         nextnumber = 1
-        for or_node in f.clauses:
+        for or_node in f.clause:
             node = set()
-            for var in or_node.clauses:
-                if var.__class__._name__ == "Not":
+            tautology = False
+            for var in or_node.clause:
+                if var.__class__.__name__ == "Not":
                     name = var.clause.name
                     negate = -1
+                elif var.__class__.__name__ == "false":
+                    continue
+                elif var.__class__.__name__ == "true":
+                    tautology = True
+                    continue
                 else:
                     name = var.name
                     negate = 1
@@ -377,16 +385,53 @@ class FlatCNF:
                 if name not in varnames:
                     varnum = nextnumber
                     nextnumber += 1
+                    varnames[name] = varnum
                 else:
                     varnum = varnames[name]
-                
+                self.name_mapping[varnum] = name
+
                 varnum *= negate
                 node.add(varnum)
-            self.clauses.append(node)
+            if not tautology:
+                self.clauses.append(node)
 
-    def _makefromfile(self, handle):
-        '''Strukturo sestavimo iz formule v datoteki, ki je ze v CNF obliki, z ostevilcenimi spremenljivkami.'''
+    def _makefromCNF(self, handle):
+        '''Strukturo sestavimo iz formule, ki je ze v CNF obliki, z ostevilcenimi spremenljivkami.
+Formula je lahko dana v datoteki (po imenu ali file objektu) ali ze kot seznam seznamov stevil.'''
 
-        with open(handle,"rt") as f:
-            for line in f:
-                self.clause.append(set( map(int,line.split()) ))
+        if handle.__class__.__name__ == "str": handle = open(handle, "rt")
+        if handle.__class__.__name__ == "file":
+            for line in handle:
+                self.clauses.append(set( map(int,line.split()) ))
+        else:
+            for or_node in handle:
+                self.clauses.append(set(or_node))
+
+    def __unicode__(self):
+        or_list = []
+        for or_node in self.clauses:
+            var_list = []
+            for var in or_node:
+                if abs(var) in self.name_mapping:
+                    name = self.name_mapping[abs(var)]
+                else:
+                    name = str(abs(var))
+
+                var_list.append(u'\u00ac(' + name + u")" if var<0 else unicode(name))
+            or_list.append(u"(" + u" \u2228 ".join(var_list) + u")")
+        return u"(" + u" \u2227 ".join(or_list) + u")"
+
+    def clone(self):
+        ret = FlatCNF()
+        ret.name_mapping = self.name_mapping.copy()
+        ret.clauses = map(set.copy, self.clauses)
+	return ret
+
+    def rename(self, assignments):
+        ret = {}
+        for k in assignments:
+            if k in self.name_mapping:
+                ret[ self.name_mapping[k] ] = assignments[k]
+            else:
+                ret[k] = assignments[k]
+        return ret
