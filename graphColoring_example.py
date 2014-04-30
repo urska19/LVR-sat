@@ -24,12 +24,22 @@ formula = graph_coloring(graph, colors)
 #solve formula
 solution = solver.solve(formula)
 
+#solve2 formula
+solution2 = solver.solve(formula,True)
+
 print "Graph (" + str(colors) + " colors):"
 
 print printGraph(graph)
 
+print "SAT"
 if solution[0]:
     print processResult(solution[1])
+else:
+    print "Formula is not satisfiable."
+
+print "SAT - mt"
+if solution2[0]:
+    print processResult(solution2[1])
 else:
     print "Formula is not satisfiable."
 
@@ -41,6 +51,9 @@ formula = graph_coloring(graph, colors)
 #solve formula
 solution = solver.solve(formula)
 
+#solve2 formula
+solution2 = solver.solve(formula,True)
+
 print "Graph (" + str(colors) + " colors):"
 
 print printGraph(graph)
@@ -50,6 +63,11 @@ if solution[0]:
 else:
     print "Formula is not satisfiable."
 
+print "SAT - mt"
+if solution2[0]:
+    print processResult(solution2[1])
+else:
+    print "Formula is not satisfiable."
 
 
 graph = [
@@ -67,12 +85,21 @@ formula = graph_coloring(graph, colors)
 #solve formula
 solution = solver.solve(formula)
 
+#solve2 formula
+solution2 = solver.solve(formula,True)
+
 print "Graph (" + str(colors) + " colors):"
 
 print printGraph(graph)
 
 if solution[0]:
     print processResult(solution[1])
+else:
+    print "Formula is not satisfiable."
+
+print "SAT - mt"
+if solution2[0]:
+    print processResult(solution2[1])
 else:
     print "Formula is not satisfiable."
 
@@ -93,12 +120,20 @@ formula = graph_coloring(graph, colors)
 #solve formula
 solution = solver.solve(formula)
 
+#solve formula
+solution2 = solver.solve(formula,True)
+
 print "Graph (" + str(colors) + " colors):"
 
 print printGraph(graph)
 
 if solution[0]:
     print processResult(solution[1])
+else:
+    print "Formula is not satisfiable."
+
+if solution2[0]:
+    print processResult(solution2[1])
 else:
     print "Formula is not satisfiable."
 
@@ -110,11 +145,19 @@ formula = graph_coloring(graph, colors)
 #solve formula
 solution = solver.solve(formula)
 
+#solve2 formula
+solution2 = solver.solve(formula,True)
+
 print "Graph (" + str(colors) + " colors):"
 
 print printGraph(graph)
 
 if solution[0]:
     print processResult(solution[1])
+else:
+    print "Formula is not satisfiable."
+
+if solution2[0]:
+    print processResult(solution2[1])
 else:
     print "Formula is not satisfiable."

@@ -61,6 +61,30 @@ print "Solution:"
 # process and print result of sat solver.
 print printSudoku(processResult(result[1]))
 
+medium_board=[[None, None, 9, None, 6, 4, None, None, 1],
+        [None, None, None, None, 5, None, None, None, None],
+        [4, 6, None, 1, None, 7, None, None, 8],
+        [None, None, None, None, None, None, None, 9, None],
+        [None, None, None, None, 3, None, None, 1, None],
+        [3, None, None, None, None, None, None, 4, None],
+        [None, 4, 8, None, None, None, 2, None, None],
+        [2, None, 7, None, 4, 5, None, 8, 6],
+        [5, None, None, None, None, None, None, None, None]]
+
+
+
+print "Medium problem 2:"
+print printSudoku(medium_board)
+
+# result = solver.solve(sudoku(medium_board))
+result = solver.solve(sudoku(medium_board), True)
+
+if not result[0]:
+    print "No solution."
+else:
+    # process and print result of sat solver.
+    print printSudoku(processResult(result[1]))
+
 hard_board = [[None, None, 2, None, 8, None, None, 3, None],
         [None, None, 5, 1, 9, None, None, None, 2],
         [None, 8, None, None, None, None, None, 4, None],
