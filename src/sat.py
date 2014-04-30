@@ -394,7 +394,7 @@ class SAT_solver:
 
             temp[maxvar_name] = val
             ret = (self.solve_cnf(formula.evaluate({maxvar_name: val}),
-                temp.copy(), mthreading))[1]
+                temp, mthreading))[1]
 
             if ret != {}:
                 temp.update(ret)
