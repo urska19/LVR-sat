@@ -39,10 +39,10 @@ ___
     npr. *sudoku(matrika_sudoku)* 
 - Avtomatizirani testi:
     1. premakni se v mapo *src/automated_test*
-    2. napisi python <ime_testa>
-- Primeri: vsebujejo nekaj osnovnih Boolovih formul, barvanje grafov, sudoku. 
+    2. napisi python "ime_testa"
+- Primeri vsebujejo nekaj osnovnih Boolovih formul, barvanje grafov, sudoku. 
     1. premakni se v koren projekta
-    2. napisi python ./<ime_primera>
+    2. napisi python ./"ime_primera"
 
 ___
 
@@ -54,18 +54,20 @@ ___
 - koda
     - [vir za DPLL algoritem] (http://www.dis.uniroma1.it/~liberato/ar/dpll/dpll.html)
     - večnitna možnost: 
-        - vzdrževalna nit(zagotavlja čiščenje niti in vzdržuje zgornjo mejo, ki je nastavljiva)
+        - vzdrževalna nit (zagotavlja čiščenje niti in vzdržuje zgornjo mejo, ki je nastavljiva)
         - drsteča nit (glavna nit, ki periodično skrbi za nastajanje novih niti; perioda je nastavljiva)
         - n delovnih niti (dejansko opravljajo delo)
 
 ___
 
 **Zahteva**
+
 Python
 
 ___
 
 **Kontakt**
+
 https://github.com/urska19
 
 
