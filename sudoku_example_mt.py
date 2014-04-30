@@ -33,8 +33,8 @@ print printSudoku(board)
 # construct logical formula from board definition.
 formula = sudoku(board)
 
-# solve formula using SAT solver(singlethreaded)
-result = solver.solve(formula)
+# solve formula using SAT solver(multithreading)
+result = solver.solve(formula, True)
 
 print "Solution:"
 # process and print result of sat solver.
@@ -53,7 +53,7 @@ medium_board = [[None, None, 5, None, 6, 3, 1, 2, None],
 print "Medium problem:"
 print printSudoku(medium_board)
 
-result = solver.solve(sudoku(medium_board))
+result = solver.solve(sudoku(medium_board), True)
 
 print "Solution:"
 # process and print result of sat solver.
@@ -72,7 +72,7 @@ hard_board = [[None, None, 2, None, 8, None, None, 3, None],
 print "Hard problem:"
 print printSudoku(hard_board)
 
-result = solver.solve(sudoku(hard_board))
+result = solver.solve(sudoku(hard_board), True)
 
 print "Solution:"
 # process and print result of sat solver.
@@ -91,7 +91,7 @@ evil_board = [[None, 3, 6, None, 9, None, None, None, None],
 print "Evil problem:"
 print printSudoku(evil_board)
 
-result = solver.solve(sudoku(evil_board))
+result = solver.solve(sudoku(evil_board), True)
 
 print "Solution:"
 # process and print result of sat solver.
@@ -111,7 +111,7 @@ evil_board = [[None, 3, 6, None, 9, None, None, None, 3],
 print "Evil problem (no solution):"
 print printSudoku(evil_board)
 
-result = solver.solve(sudoku(evil_board))
+result = solver.solve(sudoku(evil_board), True)
 
 print "Solution:"
 
