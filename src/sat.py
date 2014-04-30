@@ -79,15 +79,16 @@ class SAT_solver:
 
         :formula: formula to be satisfied
         :dictionary: dictionary of current variable-value
-        :return: boolean if thread is added to the queue
         """
+
+        self.addThreadLock.acquire()
+        self.threadsToBe.append((formula, dictionary, True))
+        self.addThreadLock.release()
+
+    def canSetThread(self):
         if len(self.threads) + len(self.threadsToBe) > self.maxThreadCount or self.stopped(True):
             return False
-        else:
-            self.addThreadLock.acquire()
-            self.threadsToBe.append((formula, dictionary, True))
-            self.addThreadLock.release()
-            return True
+        return True
 
     def runThreads(self):
         """
@@ -383,8 +384,11 @@ class SAT_solver:
         #multithreading mode
         literals = [value, not value]
         temp[maxvar_name] = not value
-        if(mthreading and self.addWorkingThread(formula.evaluate({maxvar_name:
-            not value}), temp.copy())):
+
+        #seperating check and setting of new thread
+        #quicker but larger variation from upper bound
+        if(mthreading and self.canSetThread()):
+            self.addWorkingThread(formula.evaluate({maxvar_name: not value}), temp.copy())
             literals = [value]
 
         #recursive calls
