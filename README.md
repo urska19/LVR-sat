@@ -15,7 +15,7 @@ ___
 - *sudoku_example_mt.py* ... nekaj primerov reševanja sudokujev z večnitnih SAT solverjem
 - *src/graphColoring.py* ... prevedba problema barvanja grafov v Boolovo formulo
 - *src/logConstruct.py* ... elementi za predstavitev Boolove formule
-- *src/sat.py* ... SAT solver
+- *src/sat.py* ... SAT solver, ki ima možnost enonitnega in večnitnega delovanja
 - *src/sudoku.py* ... prevedba reševanja sudokuja v Boolovo formulo
 - *src/test.py* ... nekaj testnih primerov za preverjanje pravilnosti implementacije
 - *src/automated_test/test_cnf_basic.py* ... testi za preverjanje delovanja funkcije cnf
@@ -39,10 +39,10 @@ ___
     npr. *sudoku(matrika_sudoku)* 
 - Avtomatizirani testi:
     1. premakni se v mapo *src/automated_test*
-    2. napisi python "ime_testa"
+    2. napisi python *ime_testa*
 - Primeri vsebujejo nekaj osnovnih Boolovih formul, barvanje grafov, sudoku. 
     1. premakni se v koren projekta
-    2. napisi python ./"ime_primera"
+    2. napisi python ./*ime_primera*
 
 ___
 
