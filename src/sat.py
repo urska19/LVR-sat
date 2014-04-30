@@ -6,9 +6,9 @@ import threading
 
 class SAT_solver:
 
-    maxThreadCount = 5
 
     def __init__(self):
+        self.maxThreadCount = 5
         self.solutionDict = {}
         self.threads = []
         self.threadsToBe = []
@@ -16,6 +16,16 @@ class SAT_solver:
         self.addThreadLock = threading.Lock()
         self._stop = threading.Event()
         self.initialize()
+
+    def setMaxThreadCount(self, count):
+        """
+        Set upper bound for number of threads.
+        """
+
+        if count < 2:
+            return
+
+        self.maxThreadCount = count
 
     def initialize(self):
         for thread in self.threads:
@@ -28,15 +38,33 @@ class SAT_solver:
 
 
     def stop(self):
+        """
+        Signalize threads to stop execution.
+        """
+
         self._stop.set()
 
     def stopped(self, mthreading):
+        """
+        Check if stop signal is raised.
+
+        :mthreading: boolean value indicating if it is multithreading mode of
+        operation
+        :return: boolean
+        """
         if not mthreading:
             return False
 
         return self._stop.isSet()
 
     def setSolution(self, dictionary, solution2):
+        """
+        Set solution in multithreading mode.
+
+        :dictionary: dictionary of variable-value
+        :solution2: boolean if dictionary satisfies formula
+        :return: void
+        """
         if self.solution or not solution2:
             return
 
@@ -46,6 +74,13 @@ class SAT_solver:
         self.solutionLock.release()
 
     def addWorkingThread(self, formula, dictionary):
+        """
+        Add worker thread in the queue.
+
+        :formula: formula to be satisfied
+        :dictionary: dictionary of current variable-value
+        :return: boolean if thread is added to the queue
+        """
         if len(self.threads) + len(self.threadsToBe) > self.maxThreadCount or self.stopped(True):
             return False
         else:
@@ -55,6 +90,9 @@ class SAT_solver:
             return True
 
     def runThreads(self):
+        """
+        Run threads from the queue.
+        """
 
         if(len(self.threadsToBe) == 0):
             return
@@ -70,9 +108,13 @@ class SAT_solver:
             thread.start()
             self.threads.append(thread)
 
-
-
     def addMaintainanceThread(self, timeout):
+        """
+        Run maintainance thread.
+
+        :timeout: period in seconds
+        """
+
         self.addThreadLock.acquire()
 
         thread = threading.Thread(target=self.maintainanceOfThreads,
@@ -85,6 +127,11 @@ class SAT_solver:
         self.addThreadLock.release()
 
     def maintainanceOfThreads(self, timeout):
+        """
+        Thread maintainance.
+
+        :timeout: period in seconds
+        """
         while(True):
             if self.stopped(True):
                 break
@@ -93,15 +140,17 @@ class SAT_solver:
             self.addThreadLock.acquire()
             self.threads = filter(lambda x: x.isAlive(), self.threads)
             self.addThreadLock.release()
-            # print "Before-after: " + str(before) + "-" + str(len(self.threads))
-
             time.sleep(timeout)
-        # print "Game over"
 
 
     @staticmethod
     def up(formula):
-        """Return None if there is contradiction and dictionary otherwise."""
+        """
+        Up DPLL method.
+
+        :formula: bolean formula
+        :return: None if contradiction and dictionary otherwise.
+        """
         #filter clauses which contains one element
         fformula = filter(lambda x: len(x.clause) == 1, formula.clause)
 
@@ -127,8 +176,12 @@ class SAT_solver:
 
     @staticmethod
     def purge(formula):
-        """Return None if there is no elements which can be"""
-        """purged or dictionary otherwise."""
+        """
+        Purge DPLL method.
+
+        :formula: bolean formula
+        :return: dictionary of variable-values or None
+        """
         #get all variables in clauses
         element = reduce(lambda x, y: x + y,
                     map(lambda x: x.clause, formula.clause), [])
@@ -151,6 +204,12 @@ class SAT_solver:
     
     @staticmethod
     def canreturn(formula, result_dict):
+        """
+        Helper method for determine if we should return.
+
+        :formula: bolean formula
+        :result_dict: dictionary of variable-value
+        """
         if formula.__class__.__name__ == "true":
             return True, result_dict
         elif formula.__class__.__name__ == "false":
@@ -162,6 +221,14 @@ class SAT_solver:
         return False, result_dict
 
     def solve(self, formula, mthreading=False):
+        """
+        Solve boolean formula.
+
+        :formula: boolean formula
+        :mthreading: multithread mode of execution
+
+        :return: (boolean - is formula satisfiable, dictionary - assig values) 
+        """
         formula = formula.nnf().cnf().simplify().deduplicate()
 
         if not mthreading:
@@ -199,77 +266,21 @@ class SAT_solver:
 
     #setting solution dependant of mode of execution
     def returnSolution(self, solution, dictionary, mthreading):
+        """
+        Return solution based on mode of execution.
+        """
         if solution and mthreading:
             self.setSolution(dictionary, solution)
 
         return (solution, dictionary)
 
-    def solve_cnf(self, formula, result_dict, mthreading=False):
-        temp = result_dict.copy()
-
-        #upping
-        while True:
-
-            #if thread is stopped
-            if self.stopped(mthreading):
-                return self.returnSolution(False, {}, mthreading)
-
-            flag, temp = SAT_solver.canreturn(formula, temp)
-
-            if flag:
-                if formula.__class__.__name__ == "true":
-                    return self.returnSolution(True, temp, mthreading)
-                else:
-                    # return self.returnSolution(False, temp, mthreading)
-                    return self.returnSolution(False, {}, mthreading)
-
-            result = SAT_solver.up(formula)
-            if result is None:
-                return self.returnSolution(False, {}, mthreading)
-            if result == {}:
-                break
-            formula = formula.evaluate(result)
-            temp.update(result)
-
-
-        # flag, temp = SAT_solver.canreturn(formula, temp)
-        # if flag:
-        #     if formula.__class__.__name__ == "true":
-        #         return self.returnSolution(True, temp, mthreading)
-        #     else:
-        #         # return self.returnSolution(False, temp, mthreading)
-        #         return self.returnSolution(False, {}, mthreading)
-
-        # purging
-        while True:
-            if self.stopped(mthreading):
-                return self.returnSolution(False, {}, mthreading)
-
-            flag, temp = SAT_solver.canreturn(formula, temp)
-
-            if flag:
-                if formula.__class__.__name__ == "true":
-                    return self.returnSolution(True, temp, mthreading)
-                else:
-                    # return self.returnSolution(False, temp, mthreading)
-                    return self.returnSolution(False, {}, mthreading)
-
-            values = SAT_solver.purge(formula)
-            if values == {}:
-                break
-            formula = formula.evaluate(values)
-            temp.update(values)
-
-        # flag, temp = SAT_solver.canreturn(formula, temp)
-        # if flag:
-        #     if formula.__class__.__name__ == "true":
-        #         return self.returnSolution(True, temp, mthreading)
-        #     else:
-        #         # return self.returnSolution(False, temp, mthreading)
-        #         return self.returnSolution(False, {}, mthreading)
-
-        if self.stopped(mthreading):
-            return self.returnSolution(False, {}, mthreading)
+    def findVariable(self, formula):
+        """
+        Find variable and value which cancels most clauses.
+        
+        :formula: boolean formula
+        :return: (variable, boolean)
+        """
 
         # heuristic - find variable which cancels max num of clauses.
         # take into account negation
@@ -305,10 +316,72 @@ class SAT_solver:
                     maxvar_count = num[1]
                     value = False
 
-        # recursive call
-        literals = [value, not value]
+        return maxvar_name, value
+
+    def solve_cnf(self, formula, result_dict, mthreading=False):
+        """
+        DPLL algorithm.
+        
+        :formula: boolean formula.
+        :result_dict: dictionary
+        :mthreading: (boolean) multithreading mode of execution.
+        :return: (boolean - is formula satisfiable, dictionary - values of
+        variables)
+        """
+        temp = result_dict.copy()
+
+        #upping
+        while True:
+
+            #if thread is stopped
+            if self.stopped(mthreading):
+                return self.returnSolution(False, {}, mthreading)
+
+            flag, temp = SAT_solver.canreturn(formula, temp)
+
+            if flag:
+                if formula.__class__.__name__ == "true":
+                    return self.returnSolution(True, temp, mthreading)
+                else:
+                    # return self.returnSolution(False, temp, mthreading)
+                    return self.returnSolution(False, {}, mthreading)
+
+            result = SAT_solver.up(formula)
+            if result is None:
+                return self.returnSolution(False, {}, mthreading)
+            if result == {}:
+                break
+            formula = formula.evaluate(result)
+            temp.update(result)
+
+        # purging
+        while True:
+            if self.stopped(mthreading):
+                return self.returnSolution(False, {}, mthreading)
+
+            flag, temp = SAT_solver.canreturn(formula, temp)
+
+            if flag:
+                if formula.__class__.__name__ == "true":
+                    return self.returnSolution(True, temp, mthreading)
+                else:
+                    # return self.returnSolution(False, temp, mthreading)
+                    return self.returnSolution(False, {}, mthreading)
+
+            values = SAT_solver.purge(formula)
+            if values == {}:
+                break
+            formula = formula.evaluate(values)
+            temp.update(values)
+
+        if self.stopped(mthreading):
+            return self.returnSolution(False, {}, mthreading)
+
+        #heuristic
+        maxvar_name, value = self.findVariable(formula)
 
         #multithreading mode
+        literals = [value, not value]
         temp[maxvar_name] = not value
         if(mthreading and self.addWorkingThread(formula.evaluate({maxvar_name:
             not value}), temp.copy())):
@@ -320,7 +393,6 @@ class SAT_solver:
                 return self.returnSolution(False, {}, mthreading)
 
             temp[maxvar_name] = val
-            # ret = (self.solve_cnf(formula.evaluate({maxvar_name: val}), temp))[1]
             ret = (self.solve_cnf(formula.evaluate({maxvar_name: val}),
                 temp.copy(), mthreading))[1]
 
