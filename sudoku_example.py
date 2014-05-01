@@ -33,7 +33,7 @@ print printSudoku(board)
 # construct logical formula from board definition.
 formula = sudoku(board)
 
-# solve formula using SAT solver.
+# solve formula using SAT solver(singlethreaded)
 result = solver.solve(formula)
 
 print "Solution:"

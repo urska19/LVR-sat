@@ -186,3 +186,37 @@ formula = sudoku(board)
 # sys.stderr.write( unicode(sudoku(board)[0].nnf().cnf().simplify()).encode("utf-8") )
 result = solver.solve(formula)
 print printSudoku(processResult(result[1]))
+
+
+
+print "================================================="
+print "================================================="
+print "SAT Solver - mt - Testing"
+print "================================================="
+solver = SAT_solver()
+for i in globals().keys():
+    if i[:4] == "expr":
+        print i, ":", unicode(globals()[i]), "->", solver.solve(globals()[i],True)
+
+print unicode(true()), "->", solver.solve(true(),True)
+print "================================================="
+print "sudoku"
+
+board=[[4, 8, None, 1, 6, None, None, None, 7],
+ [1, None, 7, 4, None, 3, 6, None, None],
+ [3, None, None, 5, None, None, 4, 2, None],
+ [None, 9, None, None, 3, 2, 7, None, 4],
+ [None, None, None, None, None, None, None, None, None],
+ [2, None, 4, 8, 1, None, None, 6, None],
+ [None, 4, 1, None, None, 8, None, None, 6],
+ [None, None, 6, 7, None, 1, 9, None, 3],
+ [7, None, None, None, 9, 6, None, 4, None]]
+
+print printSudoku(board)
+
+import sys
+formula = sudoku(board)
+# sys.stderr.write( unicode(sudoku(board)[0].nnf().cnf().simplify()).encode("utf-8") )
+result = solver.solve(formula, True)
+print printSudoku(processResult(result[1]))
+

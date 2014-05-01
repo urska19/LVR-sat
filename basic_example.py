@@ -158,8 +158,26 @@ print "================================================="
 solver = SAT_solver()
 for i in globals().keys():
     if i[:4] == "expr":
-        print i, ":", unicode(globals()[i]), "-------->", solver.solve(globals()[i])
-        print i, ":", unicode(globals()[i]), "--flat-->", solver.solve(FlatCNF(globals()[i]))
+        print i, ":", unicode(globals()[i]), "->", solver.solve(globals()[i])
+
+print "================================================="
+print "SAT Solver - mt"
+print "================================================="
+solver = SAT_solver()
+for i in globals().keys():
+    if i[:4] == "expr":
+        print i, ":", unicode(globals()[i]), "->", solver.solve(globals()[i],True)
+
+
+print "================================================="
+print "SAT Solver - multiprocess"
+print "================================================="
+solver = SAT_solver()
+for i in globals().keys():
+    if i[:4] == "expr":
+        print i, ":", unicode(globals()[i]), "->", solver.solve(FlatCNF(globals()[i]))
+
+
 #
 #
 #==========================================
