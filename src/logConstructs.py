@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# vim: et:sts=4:sw=4:
 
 '''Logicni elementi za Boolove formule.'''
 
@@ -420,6 +421,27 @@ Formula je lahko dana v datoteki (po imenu ali file objektu) ali ze kot seznam s
                 var_list.append(u'\u00ac(' + name + u")" if var<0 else unicode(name))
             or_list.append(u"(" + u" \u2228 ".join(var_list) + u")")
         return u"(" + u" \u2227 ".join(or_list) + u")"
+
+    def evaluate(self, var, value):
+        '''Evaluate the formula with the given variable and its value, and return False if the formula becomes False.'''
+        if (var>=0) != value:
+            var = -var
+        for or_node in self.clauses:
+            if var in or_node:
+                # this entire or-clause becomes a tautology with the given evaluation
+                or_node.clear()
+                or_node.add('x')
+            # (false OR expr...) == expr...
+            if -var in or_node and len(or_node) == 1:
+                return False
+            or_node.discard(-var)
+        self.clauses = filter(lambda x: 'x' not in x and len(x) > 0, self.clauses)
+        return self
+
+    def dump(self, filename):
+        with open(filename,"wt") as f:
+            f.write("p cnf %d %d\n"%(len(self.name_mapping), len(self.clauses)))
+            f.write(("\n".join(" ".join(map(str, or_node))+" 0" for or_node in self.clauses))+"\n")
 
     def clone(self):
         ret = FlatCNF()
