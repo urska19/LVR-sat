@@ -3,7 +3,7 @@
 from logConstructs import *
 from random import shuffle
 import multiprocessing as mp
-import cPickle
+from cPickle import dumps, loads
 
 class SAT_solver:
 
@@ -78,8 +78,6 @@ class SAT_solver:
     def solve_cnf(self, formula, result_dict):
         temp = result_dict.copy()
 
-        #print "solving CNF"
-        
         #upping
         while True:
             flag, temp = SAT_solver.canreturn(formula, temp)
@@ -97,8 +95,6 @@ class SAT_solver:
             if result == {}:
                 break
             temp.update(result)
-
-        #print "after upping"
 
         flag, temp = SAT_solver.canreturn(formula, temp)
         if flag: return (True, temp)
@@ -124,8 +120,6 @@ class SAT_solver:
                 return (True, temp)
             else:
                 return (False, temp)
-
-        #print "after purging"
 
         # heuristic - find variable which cancels max num of clauses.
         # take into account negation
@@ -163,7 +157,6 @@ class SAT_solver:
 
         # recursive call
         literals = [value, not value]
-        #print "branching on", maxvar_name
         for val in literals:
             temp[maxvar_name] = val
             ret = (self.solve_cnf(formula.evaluate({maxvar_name: val}), temp))[1]
@@ -174,6 +167,10 @@ class SAT_solver:
         return (False, {})
 
     def solve_flat_toplevel(self, formula, force_nprocs = None):
+        # bootstrap the parallel solver:
+        # - create the worker pool and associated bureaucracy
+        # - push the initial work packet into the queue
+        # - wait for the results to come in
         try:
             nprocs = mp.cpu_count()
         except:
@@ -187,22 +184,16 @@ class SAT_solver:
         q = mp.Queue()
         waitcounter = mp.Value("L", 0)
         terminate_flag = mp.Event()
-        #formula.dump("formula.cnf")
-        pool = [mp.Process(name="sat", target=SAT_solver.queue_worker, args=(q, terminate_flag, waitcounter, resultlock, result, nprocs)) for i in range(nprocs)]
-        map(mp.Process.start, pool)
-        #print "main process, formula is:", unicode(formula), formula.name_mapping
-        q.put(dumps({"formula":formula, "assignments":{}}))
 
-        #terminate_flag.wait()
+        pool = [mp.Process(name="sat", target=SAT_solver.queue_worker, args=(q, terminate_flag, waitcounter, resultlock, result, nprocs)) for i in range(nprocs)]
+        q.put(dumps({"formula":formula, "assignments":{}}))
+        map(mp.Process.start, pool)
+
         d = result.get()
 
         map(mp.Process.terminate, pool)
         map(mp.Process.join, pool)
 
-        #s = []
-        #for k in d:
-        #    if d[k]: s.append(k)
-        #print sorted(s)
         return (len(d) > 0, d)
 
     @staticmethod
@@ -272,6 +263,7 @@ class SAT_solver:
                     have_work = True
                     waitcounter.value -= 1
                 except:
+                    # if the queue is empty and all the other threads are waiting as well, terminate processing
                     if waitcounter.value == poolsize:
                         for i in range(poolsize-1):
                             q.put(dumps({'terminate':True}))
@@ -291,7 +283,6 @@ class SAT_solver:
             formula = work["formula"]
 
             solvable, maxvar = work_section(formula, assignments)
-            #print solvable, maxvar, assignments
 
             # check if we can terminate already
             if solvable == True:
@@ -305,23 +296,17 @@ class SAT_solver:
                     result.put(formula.rename(assignments))
                     for i in range(poolsize-1):
                         q.put(dumps({'terminate':True}))
-                    print "found solution, terminating"
                 break
             if solvable == False:
-                #print "dead branch, next"
                 continue
 
             # now enqueue both branches
-            #print "branching on", maxvar
             assignments[abs(maxvar)] = (maxvar>=0)
             newformula = formula.clone().evaluate(maxvar, maxvar>=0)
             if newformula != False and not terminate_flag.is_set():
                 q.put(dumps({"formula":newformula, "assignments":assignments}))
-            #print "  > > put in two new works", assignments, maxvar, unicode(formula)
 
             assignments[abs(maxvar)] = (maxvar<0)
             newformula = formula.clone().evaluate(maxvar, maxvar<0)
             if newformula != False and not terminate_flag.is_set():
                 q.put(dumps({"formula":newformula, "assignments":assignments}))
-            #print "  >>> put in two new works", assignments, maxvar, unicode(formula)
-        #print "worker terminating, bye"

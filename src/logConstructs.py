@@ -423,7 +423,8 @@ Formula je lahko dana v datoteki (po imenu ali file objektu) ali ze kot seznam s
         return u"(" + u" \u2227 ".join(or_list) + u")"
 
     def evaluate(self, var, value):
-        '''Evaluate the formula with the given variable and its value, and return False if the formula becomes False.'''
+        '''Delno evaluira formulo z dano spremenljivko in vrednostjo, ter pri tem pazi na morebitne
+prazne ali-stavke. Ce je nova formula neresljiva, vrne False, sicer pa novo formulo.'''
         if (var>=0) != value:
             var = -var
         for or_node in self.clauses:
@@ -444,12 +445,15 @@ Formula je lahko dana v datoteki (po imenu ali file objektu) ali ze kot seznam s
             f.write(("\n".join(" ".join(map(str, or_node))+" 0" for or_node in self.clauses))+"\n")
 
     def clone(self):
+        '''Naredi globoko kopijo te formule kot nov objekt.'''
         ret = FlatCNF()
         ret.name_mapping = self.name_mapping.copy()
         ret.clauses = map(set.copy, self.clauses)
 	return ret
 
     def rename(self, assignments):
+        '''Preimenuje spremenljivke v dani resitvi iz internega imenskega prostora (stevilke) v izvornega
+(ce je bila formula konstruirana iz objekta z imenovanimi spremenljivkami).'''
         ret = {}
         for k in assignments:
             if k in self.name_mapping:
