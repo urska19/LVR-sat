@@ -5,6 +5,63 @@ from random import shuffle
 import multiprocessing as mp
 import cPickle
 
+class QueueWrapper:
+    def __init__(self, poolsize):
+        self.q = mp.Queue()
+        self.limit = poolsize
+        self.counter = mp.Value('L', 0)
+        self.waiters = mp.Value('L', 0)
+        self.cond = mp.Condition()
+        self.killed = mp.Event()
+
+    def put(self, obj):
+        self.cond.acquire()
+        if self.killed.is_set():
+            self.cond.release()
+            return
+        with self.counter.get_lock():
+            self.counter.value += 1
+        self.q.put(cPickle.dumps(obj))
+        self.cond.notify()
+        self.cond.release()
+
+    def get(self):
+        self.cond.acquire()
+        if self.killed.is_set():
+            self.cond.release()
+            return None
+
+        with self.waiters.get_lock():
+            self.waiters.value += 1
+        if self.waiters.value == self.limit and self.counter.value == 0:
+            with self.waiters.get_lock():
+                self.waiters.value -= 1
+            self.cond.release()
+            return None
+
+        while self.counter.value == 0 and not self.killed.is_set():
+            self.cond.wait()
+
+        if self.killed.is_set():
+            with self.counter.get_lock():
+                while self.counter.value > 0:
+                    self.q.get()
+                    self.counter.value -= 1
+            self.cond.release()
+            return None
+
+        ret = cPickle.loads(self.q.get())
+        with self.counter.get_lock():
+            self.counter.value -= 1
+        self.cond.release()
+        return ret
+
+    def kill(self):
+        self.cond.acquire()
+        self.killed.set()
+        self.cond.notify_all()
+        self.cond.release()
+
 class SAT_solver:
 
     @staticmethod
@@ -179,21 +236,18 @@ class SAT_solver:
         except:
             nprocs = 2
         if force_nprocs is not None: nprocs = force_nprocs
+        nprocs = 2
 
         # manage our own process "pool", since the waiting requirements would make
         # it impractical to use the builtin one
         resultlock = mp.Lock()
         result = mp.Queue(1)
-        q = mp.Queue()
-        waitcounter = mp.Value("L", 0)
-        terminate_flag = mp.Event()
+        q = QueueWrapper(nprocs)
         #formula.dump("formula.cnf")
-        pool = [mp.Process(name="sat", target=SAT_solver.queue_worker, args=(q, terminate_flag, waitcounter, resultlock, result, nprocs)) for i in range(nprocs)]
+        pool = [mp.Process(name="sat", target=SAT_solver.queue_worker, args=(q, resultlock, result)) for i in range(nprocs)]
+        q.put({"formula":formula, "assignments":{}})
         map(mp.Process.start, pool)
-        #print "main process, formula is:", unicode(formula), formula.name_mapping
-        q.put(dumps({"formula":formula, "assignments":{}}))
 
-        #terminate_flag.wait()
         d = result.get()
 
         map(mp.Process.terminate, pool)
@@ -206,7 +260,7 @@ class SAT_solver:
         return (len(d) > 0, d)
 
     @staticmethod
-    def queue_worker(q, terminate_flag, waitcounter, resultlock, result, poolsize):
+    def queue_worker(q, resultlock, result):
         # make it easier to break execution when we find a contradiction/etc., so we don't
         # have to make tons of flags and if's in place of goto's
         # if we get a final boolean result here, return that; otherwise return None
@@ -260,33 +314,12 @@ class SAT_solver:
             return None, maxvar
 
         while True:
-            # get new work packet
-            # if all other threads are waiting as well, this means the queue has drained and we should terminate
-            have_work = False
-            with waitcounter.get_lock():
-                waitcounter.value += 1
-                try:
-                    # with empty queues, there might be a random small delay between q.put() and q.empty()!=False
-                    # the timeout here is a fragile workaround
-                    work = q.get(block=True, timeout=1)
-                    have_work = True
-                    waitcounter.value -= 1
-                except:
-                    if waitcounter.value == poolsize:
-                        for i in range(poolsize-1):
-                            q.put(dumps({'terminate':True}))
-                        waitcounter.value -= 1
-                        result.put({})
-                        terminate_flag.set()
-                        break
-            if not have_work:
-                work = q.get()
-                with waitcounter.get_lock():
-                    waitcounter.value -= 1
-
-            work = loads(work)
-            if 'terminate' in work:
+            work = q.get()
+            if work is None:
+                if resultlock.acquire(False):
+                    result.put({})
                 break
+
             assignments = work["assignments"]
             formula = work["formula"]
 
@@ -296,32 +329,30 @@ class SAT_solver:
             # check if we can terminate already
             if solvable == True:
                 if resultlock.acquire(False):
-                    terminate_flag.set()
                     # assign all the remaining variables to a default value
                     # since the formula is solvable anyway, it doesn't matter what the value really is
                     for or_node in formula.clauses:
                         for var in or_node:
                             if abs(var) not in assignments: assignments[abs(var)] = True
                     result.put(formula.rename(assignments))
-                    for i in range(poolsize-1):
-                        q.put(dumps({'terminate':True}))
+                    q.kill()
                     print "found solution, terminating"
                 break
             if solvable == False:
-                #print "dead branch, next"
+                print "dead branch, next"
                 continue
 
             # now enqueue both branches
             #print "branching on", maxvar
             assignments[abs(maxvar)] = (maxvar>=0)
             newformula = formula.clone().evaluate(maxvar, maxvar>=0)
-            if newformula != False and not terminate_flag.is_set():
-                q.put(dumps({"formula":newformula, "assignments":assignments}))
+            if newformula != False:
+                q.put({"formula":newformula, "assignments":assignments})
             #print "  > > put in two new works", assignments, maxvar, unicode(formula)
 
             assignments[abs(maxvar)] = (maxvar<0)
             newformula = formula.clone().evaluate(maxvar, maxvar<0)
-            if newformula != False and not terminate_flag.is_set():
-                q.put(dumps({"formula":newformula, "assignments":assignments}))
+            if newformula != False:
+                q.put({"formula":newformula, "assignments":assignments})
             #print "  >>> put in two new works", assignments, maxvar, unicode(formula)
-        #print "worker terminating, bye"
+        print "worker terminating, bye"
