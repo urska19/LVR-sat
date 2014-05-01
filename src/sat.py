@@ -229,7 +229,7 @@ class SAT_solver:
         """
         Solve boolean formula.
 
-        :formula: boolean formula
+        :formula: boolean formula (implies using the multiprocess if given in the FlatCNF representation)
         :mthreading: multithread mode of execution
         :force_nprocs: in multiprocess mode of execution, limit the number of worker processes
 
@@ -438,12 +438,12 @@ class SAT_solver:
         q.put(dumps({"formula":formula, "assignments":{}}))
         map(mp.Process.start, pool)
 
-        d = result.get()
+        sat, d = result.get()
 
         map(mp.Process.terminate, pool)
         map(mp.Process.join, pool)
 
-        return (len(d) > 0, d)
+        return (sat, d)
 
     @staticmethod
     def queue_worker(q, terminate_flag, waitcounter, resultlock, result, poolsize):
@@ -518,7 +518,7 @@ class SAT_solver:
                         for i in range(poolsize-1):
                             q.put(dumps({'terminate':True}))
                         waitcounter.value -= 1
-                        result.put({})
+                        result.put((False, {}))
                         terminate_flag.set()
                         break
             if not have_work:
@@ -543,7 +543,7 @@ class SAT_solver:
                     for or_node in formula.clauses:
                         for var in or_node:
                             if abs(var) not in assignments: assignments[abs(var)] = True
-                    result.put(formula.rename(assignments))
+                    result.put((True, formula.rename(assignments)))
                     for i in range(poolsize-1):
                         q.put(dumps({'terminate':True}))
                 break
