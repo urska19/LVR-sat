@@ -2,7 +2,7 @@
 import sys
 sys.path.append("./src")
 from graphColoring import graph_coloring, printGraph, processResult
-from sat import SAT_solver
+from sat import SAT_solver, FlatCNF
 
 
 #instance of sat solver
@@ -27,6 +27,9 @@ solution = solver.solve(formula)
 #solve2 formula
 solution2 = solver.solve(formula,True)
 
+#flatcnf solution
+solution3 = solver.solve(FlatCNF(formula))
+
 print "Graph (" + str(colors) + " colors):"
 
 print printGraph(graph)
@@ -43,6 +46,12 @@ if solution2[0]:
 else:
     print "Formula is not satisfiable."
 
+print "SAT - flat"
+if solution3[0]:
+    print processResult(solution3[1])
+else:
+    print "Formula is not satisfiable."
+
 colors = 2
 
 #construct formula for certain graph and number of colors
@@ -53,6 +62,9 @@ solution = solver.solve(formula)
 
 #solve2 formula
 solution2 = solver.solve(formula,True)
+
+#flatcnf solution
+solution3 = solver.solve(FlatCNF(formula))
 
 print "Graph (" + str(colors) + " colors):"
 
@@ -66,6 +78,12 @@ else:
 print "SAT - mt"
 if solution2[0]:
     print processResult(solution2[1])
+else:
+    print "Formula is not satisfiable."
+
+print "SAT - flat"
+if solution3[0]:
+    print processResult(solution3[1])
 else:
     print "Formula is not satisfiable."
 
@@ -88,6 +106,9 @@ solution = solver.solve(formula)
 #solve2 formula
 solution2 = solver.solve(formula,True)
 
+#flatcnf solution
+solution3 = solver.solve(FlatCNF(formula))
+
 print "Graph (" + str(colors) + " colors):"
 
 print printGraph(graph)
@@ -102,6 +123,13 @@ if solution2[0]:
     print processResult(solution2[1])
 else:
     print "Formula is not satisfiable."
+
+print "SAT - flat"
+if solution3[0]:
+    print processResult(solution3[1])
+else:
+    print "Formula is not satisfiable."
+
 
 graph=[
     [0, 1, 1, 1, 1],
@@ -123,6 +151,9 @@ solution = solver.solve(formula)
 #solve formula
 solution2 = solver.solve(formula,True)
 
+#flatcnf solution
+solution3 = solver.solve(FlatCNF(formula))
+
 print "Graph (" + str(colors) + " colors):"
 
 print printGraph(graph)
@@ -134,6 +165,12 @@ else:
 
 if solution2[0]:
     print processResult(solution2[1])
+else:
+    print "Formula is not satisfiable."
+
+print "SAT - flat"
+if solution3[0]:
+    print processResult(solution3[1])
 else:
     print "Formula is not satisfiable."
 
@@ -148,6 +185,9 @@ solution = solver.solve(formula)
 #solve2 formula
 solution2 = solver.solve(formula,True)
 
+#flatcnf solution
+solution3 = solver.solve(FlatCNF(formula))
+
 print "Graph (" + str(colors) + " colors):"
 
 print printGraph(graph)
@@ -161,3 +201,10 @@ if solution2[0]:
     print processResult(solution2[1])
 else:
     print "Formula is not satisfiable."
+
+print "SAT - flat"
+if solution3[0]:
+    print processResult(solution3[1])
+else:
+    print "Formula is not satisfiable."
+
