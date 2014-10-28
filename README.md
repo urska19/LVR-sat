@@ -3,7 +3,7 @@ LVR-sat
 
 Ekipa PBK (Urška, Jan, Luka)
 
-V repositoriju je napisan SAT solver, osnova za logične izraze in nekaj prevedb problemov v Boolove formule.
+V repositoriju je napisan SAT solver, osnova za logične izraze in nekaj prevedb problemov v Boolove formule. Repositorij je nastal v sklopu predmeta Logika v računalništvu 2013/2014.
 ___
 
 
